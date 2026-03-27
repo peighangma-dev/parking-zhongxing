@@ -1,0 +1,34 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: parking-uc
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: parking
+    password: parking123
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.parking.uc.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: parking-system-secret-key-change-in-production
+  expiration: 86400000
+
+logging:
+  level:
+    com.parking: DEBUG
