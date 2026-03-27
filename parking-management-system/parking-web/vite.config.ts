@@ -24,6 +24,11 @@ export default defineConfig({
   server: {
     port: 5173,
     allowedHosts: ['.monkeycode-ai.online'],
+    hmr: {
+      host: 'b1b72011266b.monkeycode-ai.online',
+      port: 443,
+      protocol: 'wss'
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
