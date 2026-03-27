@@ -1,5 +1,6 @@
 package com.parking.uc.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.parking.uc.entity.SysUser;
 import java.util.Map;
 
@@ -10,4 +11,14 @@ public interface UserService {
     SysUser getById(Long id);
 
     SysUser getByUsername(String username);
+
+    SysUser register(SysUser user);
+
+    IPage<SysUser> page(Integer current, Integer size, String username, String nickname);
+
+    boolean updateUser(Long id, SysUser user);
+
+    boolean deleteUser(Long id);
+
+    boolean updatePassword(Long id, String oldPassword, String newPassword);
 }
