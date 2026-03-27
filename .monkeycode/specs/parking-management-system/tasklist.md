@@ -1,0 +1,786 @@
+# 停车场管理系统实施计划
+
+## 阶段一：项目初始化与公共模块
+
+- [ ] 1. 初始化 Maven 多模块项目结构
+   - 创建 parking-management-system 父 pom.xml
+   - 定义聚合模块：parking-gateway, parking-barrier, parking-payment, parking-vehicle, parking-report, parking-common, parking-web
+   - 配置统一的 Spring Boot 版本 (3.2)、Java 版本 (17)、编码格式 (UTF-8)
+
+- [ ] 2. 创建 parking-common 公共模块
+   - [ ] 2.1 创建 parking-common-core 核心工具子模块
+     - 定义统一响应结果类 Result<T>
+     - 定义分页请求和分页结果类
+     - 定义系统错误码枚举 ErrorCode
+     - 编写异常类：BusinessException、ValidateException
+     - 编写日期工具类 DateUtils、字符串工具类 StringUtils
+   
+   - [ ] 2.2 创建 parking-common-database 数据库子模块
+     - 集成 MyBatis-Plus 3.5 依赖
+     - 编写分页插件配置
+     - 编写逻辑删除插件配置
+     - 定义 BaseEntity 基础实体类（包含 id, createdAt, updatedAt, deleted 字段）
+   
+   - [ ] 2.3 创建 parking-common-redis 缓存子模块
+     - 集成 Redis 和 Redisson
+     - 编写 Redis 序列化配置
+     - 封装 RedisTemplate 工具类
+
+- [ ] 3. 配置 Docker Compose 开发环境
+   - 编写 docker-compose.yml 配置 MySQL 8.0、Redis 7.0、Kafka
+   - 编写初始化 SQL 脚本创建 parking_db 数据库
+   - 验证各服务连接正常
+
+## 阶段二：数据库表结构实现
+
+- [ ] 4. 创建数据库表结构
+   - [ ] 4.1 编写 barrier 道闸设备表 SQL
+     - 字段：id, code, name, location, total_lanes, status, raise_timeout, created_at, updated_at
+   
+   - [ ] 4.2 编写 lane 车道表 SQL
+     - 字段：id, barrier_id, lane_name, lane_type, camera_id, barrier_controller_id, status
+   
+   - [ ] 4.3 编写 owner 车主信息表 SQL
+     - 字段：id, name, phone, id_card, address, created_at
+   
+   - [ ] 4.4 编写 vehicle 车辆表 SQL
+     - 字段：id, plate_number, plate_color, vehicle_brand, vehicle_type, owner_id, vehicle_type_cat, status, created_at
+   
+   - [ ] 4.5 编写 member 月卡表 SQL
+     - 字段：id, owner_id, vehicle_id, member_type, start_date, end_date, balance, status, created_at
+   
+   - [ ] 4.6 编写 pass_record 通行记录表 SQL
+     - 字段：id, plate_number, lane_id, pass_type, pass_status, recognition_confidence, image_url, fee_calculated, pass_time, created_at
+   
+   - [ ] 4.7 编写 payment 支付记录表 SQL
+     - 字段：id, order_no, pass_record_id, plate_number, amount_due, amount_paid, payment_channel_id, payment_status, payment_time, transaction_id, created_at
+   
+   - [ ] 4.8 编写 payment_channel 支付渠道表 SQL
+     - 字段：id, channel_code, channel_name, fee_rate, status, sort_order
+   
+   - [ ] 4.9 编写 rate_rule 费率规则表 SQL
+     - 字段：id, rule_name, rule_type, first_hour_fee, subsequent_fee, daily_max_fee, vehicle_category, priority, status
+   
+   - [ ] 4.10 编写 blacklist 黑名单表 SQL
+     - 字段：id, vehicle_id, reason, created_at, created_by
+
+## 阶段三：车辆服务 (parking-vehicle) 开发
+
+- [ ] 5. 搭建 parking-vehicle 微服务框架
+   - 创建 Spring Boot 启动类和配置文件
+   - 配置 MyBatis-Plus、Redis、Kafka 连接
+   - 配置 Swagger/OpenAPI 文档
+
+- [ ] 6. 实现车辆管理功能
+   - [ ] 6.1 编写 Vehicle 实体类和 VehicleMapper
+   - [ ] 6.2 编写 VehicleService 业务类
+     - 实现车辆 CRUD 功能
+     - 实现按车牌号、手机号查询
+     - 实现车辆状态管理（正常/禁用）
+   
+   - [ ] 6.3 编写 VehicleController REST API
+     - POST /api/vehicle/v1/vehicles 注册车辆
+     - GET /api/vehicle/v1/vehicles 车辆列表（分页）
+     - GET /api/vehicle/v1/vehicles/{id} 车辆详情
+     - PUT /api/vehicle/v1/vehicles/{id} 更新车辆
+     - POST /api/vehicle/v1/vehicles/import 批量导入（Excel）
+   
+   - [ ] 6.4 编写单元测试
+     - 测试 VehicleService 车辆注册逻辑
+     - 测试车辆状态变更逻辑
+
+- [ ] 7. 实现车主管理功能
+   - [ ] 7.1 编写 Owner 实体类和 OwnerMapper
+   - [ ] 7.2 编写 OwnerService 业务类
+   - [ ] 7.3 编写 OwnerController REST API
+
+- [ ] 8. 实现月卡管理功能
+   - [ ] 8.1 编写 Member 实体类和 MemberMapper
+   - [ ] 8.2 编写 MemberService 业务类
+     - 实现月卡开通功能
+     - 实现月卡续期功能（按月/季/年）
+     - 实现月卡有效期验证
+     - 实现月卡到期提醒逻辑（发送领域事件）
+   
+   - [ ] 8.3 编写 MemberController REST API
+     - POST /api/vehicle/v1/members 开通月卡
+     - GET /api/vehicle/v1/members 月卡列表
+     - POST /api/vehicle/v1/members/{id}/renew 月卡续期
+     - GET /api/vehicle/v1/members/{id} 月卡详情
+   
+   - [ ] 8.4 编写单元测试
+     - 测试月卡续期计算逻辑
+     - 测试月卡有效期验证
+
+- [ ] 9. 实现黑名单管理功能
+   - [ ] 9.1 编写 Blacklist 实体类和 BlacklistMapper
+   - [ ] 9.2 编写 BlacklistService 业务类
+     - 实现加入黑名单功能
+     - 实现移出黑名单功能
+     - 实现车辆黑名单状态查询
+   
+   - [ ] 9.3 编写 BlacklistController REST API
+     - POST /api/vehicle/v1/blacklist 加入黑名单
+     - GET /api/vehicle/v1/blacklist 黑名单列表
+     - DELETE /api/vehicle/v1/blacklist/{id} 移出黑名单
+
+## 阶段四：支付服务 (parking-payment) 开发
+
+- [ ] 10. 搭建 parking-payment 微服务框架
+   - 创建 Spring Boot 启动类和配置文件
+   - 配置 MyBatis-Plus、Redis 连接
+
+- [ ] 11. 实现支付渠道管理
+   - [ ] 11.1 编写 PaymentChannel 实体类和 PaymentChannelMapper
+   - [ ] 11.2 编写 PaymentChannelService 业务类
+     - 实现支付渠道 CRUD
+     - 实现渠道启用/禁用功能
+   
+   - [ ] 11.3 编写 PaymentChannelController REST API
+     - POST /api/payment/v1/channels 创建渠道
+     - GET /api/payment/v1/channels 渠道列表
+     - PUT /api/payment/v1/channels/{id} 更新渠道
+     - DELETE /api/payment/v1/channels/{id} 删除渠道
+
+- [ ] 12. 实现费率规则管理
+   - [ ] 12.1 编写 RateRule 实体类和 RateRuleMapper
+   - [ ] 12.2 编写 RateRuleService 业务类
+     - 实现费率规则 CRUD
+     - 实现费率规则优先级排序
+   
+   - [ ] 12.3 编写 RateRuleController REST API
+
+- [ ] 13. 实现费率计算器
+   - [ ] 13.1 定义 RateCalculator 接口
+   - [ ] 13.2 编写 RateCalculatorImpl 实现类
+     - 实现首小时费用计算
+     - 实现续费费用计算（按时长）
+     - 实现24小时封顶判断
+     - 实现差异化费率（工作日/节假日/夜间）
+     - 实现不同车型费率计算
+   
+   - [ ] 13.3 编写单元测试
+     - 测试费率计算边界情况（不足1小时、按封顶金额）
+     - 测试差异化费率计算
+
+- [ ] 14. 实现支付交易功能
+   - [ ] 14.1 编写 Payment 实体类和 PaymentMapper
+   - [ ] 14.2 编写 PaymentService 业务类
+     - 实现订单创建（生成唯一订单号）
+     - 实现订单状态查询
+     - 实现订单取消功能
+     - 实现订单冲正功能
+   
+   - [ ] 14.3 编写 PaymentController REST API
+     - POST /api/payment/v1/calculate 计算费用
+     - POST /api/payment/v1/orders 创建订单
+     - GET /api/payment/v1/orders/{orderNo} 查询订单
+     - POST /api/payment/v1/orders/{orderNo}/cancel 取消订单
+     - POST /api/payment/v1/orders/{orderNo}/reverse 冲正订单
+     - POST /api/payment/v1/callback/{channel} 支付回调
+
+- [ ] 15. 实现支付渠道适配器
+   - [ ] 15.1 定义 PaymentChannelAdapter 接口
+   - [ ] 15.2 编写抽象 AbstractPaymentChannelAdapter 基类
+   - [ ] 15.3 实现微信支付适配器 WechatPayAdapter
+   - [ ] 15.4 实现支付宝适配器 AlipayAdapter
+   - [ ] 15.5 实现现金支付适配器 CashAdapter
+   - [ ] 15.6 实现 ETC 支付适配器 EtcAdapter
+   - [ ] 15.7 实现会员卡支付适配器 MemberCardAdapter
+
+## 阶段五：道闸服务 (parking-barrier) 开发
+
+- [ ] 16. 搭建 parking-barrier 微服务框架
+   - 创建 Spring Boot 启动类和配置文件
+   - 配置 MyBatis-Plus、Redis、Kafka 连接
+
+- [ ] 17. 实现道闸设备管理
+   - [ ] 17.1 编写 Barrier 实体类和 BarrierMapper
+   - [ ] 17.2 编写 BarrierService 业务类
+     - 实现道闸设备 CRUD
+     - 实现道闸状态管理（在线/离线/故障）
+   
+   - [ ] 17.3 编写 BarrierController REST API
+     - POST /api/barrier/v1/devices 注册设备
+     - GET /api/barrier/v1/devices 设备列表
+     - GET /api/barrier/v1/devices/{id} 设备详情
+     - PUT /api/barrier/v1/devices/{id} 更新设备
+     - DELETE /api/barrier/v1/devices/{id} 删除设备
+
+- [ ] 18. 实现车道管理
+   - [ ] 18.1 编写 Lane 实体类和 LaneMapper
+   - [ ] 18.2 编写 LaneService 业务类
+   - [ ] 18.3 编写 LaneController REST API
+
+- [ ] 19. 实现道闸控制器组件
+   - [ ] 19.1 定义 BarrierController 接口
+   - [ ] 19.2 编写 BarrierControllerImpl 实现类
+     - 实现抬杆方法（下发指令到道闸控制器）
+     - 实现落杆方法
+     - 实现状态查询
+     - 实现抬杆超时自动落杆逻辑
+   
+   - [ ] 19.3 编写 DeviceConnector 设备连接器
+     - 实现 TCP/IP 连接道闸控制器
+     - 实现命令下发和数据读取
+     - 实现心跳检测和重连机制
+   
+   - [ ] 19.4 编写单元测试
+     - 测试抬杆超时逻辑
+
+- [ ] 20. 实现车牌识别组件
+   - [ ] 20.1 定义 PlateRecognizer 接口
+   - [ ] 20.2 编写 PlateRecognizerImpl 实现类
+     - 集成车牌识别相机 SDK
+     - 实现车牌信息解析
+     - 实现识别结果缓存（Redis）
+   
+   - [ ] 20.3 定义 PlateInfo 车牌信息类
+
+- [ ] 21. 实现通行记录管理
+   - [ ] 21.1 编写 PassRecord 实体类和 PassRecordMapper
+   - [ ] 21.2 编写 PassRecordService 业务类
+     - 实现入场记录创建
+     - 实现出场记录创建
+     - 实现超时抬杆记录
+   
+   - [ ] 21.3 编写 PassRecordController REST API
+
+- [ ] 22. 实现车辆入场流程
+   - [ ] 22.1 定义 EntryEvent 入口事件
+   - [ ] 22.2 编写 EntryService 入口业务类
+     - 接收车牌识别结果
+     - 查询车辆信息（调用 vehicle-service）
+     - 判断月卡有效期
+     - 判断黑名单状态
+     - 执行抬杆或拒绝入场
+     - 发送入场事件到 Kafka
+   
+   - [ ] 22.3 编写 Kafka 消费者处理入场事件
+     - 写入入场通行记录
+
+- [ ] 23. 实现车辆出场流程
+   - [ ] 23.1 定义 ExitEvent 出口事件
+   - [ ] 23.2 编写 ExitService 出口业务类
+     - 接收车牌识别结果
+     - 查询车辆信息和入场记录
+     - 判断月卡有效期
+     - 计算停车费用（调用 payment-service）
+     - 检查支付状态
+     - 执行抬杆或等待支付
+   
+   - [ ] 23.3 编写 Kafka 消费者处理出场事件
+     - 写入出场通行记录
+
+- [ ] 24. 实现道闸控制 API
+   - [ ] 24.1 编写 BarrierControlController REST API
+     - POST /api/barrier/v1/control/raise 抬杆
+     - POST /api/barrier/v1/control/lower 落杆
+     - GET /api/barrier/v1/control/status/{laneId} 查询状态
+   - [ ] 24.2 集成支付成功回调触发抬杆
+
+## 阶段六：报表服务 (parking-report) 开发
+
+- [ ] 25. 搭建 parking-report 微服务框架
+
+- [ ] 26. 实现通行记录查询
+   - [ ] 26.1 编写 PassRecordService 查询类
+     - 实现按时间段查询
+     - 实现按车牌号查询
+     - 实现按通道查询
+     - 支持分页和排序
+   
+   - [ ] 26.2 编写 PassRecordController REST API
+     - GET /api/report/v1/pass-records 查询记录
+     - GET /api/report/v1/pass-records/export 导出 Excel
+
+- [ ] 27. 实现收费报表统计
+   - [ ] 27.1 编写 DailySummaryService 日报业务类
+     - 统计当日应收/实收金额
+     - 统计各支付渠道交易笔数
+     - 统计现金收入金额
+   
+   - [ ] 27.2 编写 MonthlySummaryService 月报业务类
+   - [ ] 27.3 编写 ReportController REST API
+     - GET /api/report/v1/daily-summary 收费日报
+     - GET /api/report/v1/monthly-summary 收费月报
+
+- [ ] 28. 实现日对账功能
+   - [ ] 28.1 编写 ReconcileService 对账业务类
+     - 核对当日所有交易流水
+     - 生成对账差异报告
+   
+   - [ ] 28.2 实现 POST /api/report/v1/reconcile 日对账接口
+
+## 阶段七：API 网关 (parking-gateway) 开发
+
+- [ ] 29. 搭建 parking-gateway 网关服务
+   - 集成 Spring Cloud Gateway 2023
+   - 配置路由规则（/api/barrier -> barrier-service, /api/payment -> payment-service, /api/vehicle -> vehicle-service, /api/report -> report-service）
+
+- [ ] 30. 实现认证过滤器
+   - [ ] 30.1 编写 AuthFilter 认证过滤器
+     - 验证 JWT Token
+     - 提取用户信息到请求头
+     - 放行公开接口
+
+- [ ] 31. 配置网关全局异常处理
+
+## 阶段八：前端管理后台 (parking-web) 开发
+
+- [ ] 32. 初始化 Vue 3 项目
+   - 使用 Vite 5 创建项目
+   - 集成 Element Plus 2.5
+   - 集成 Vue Router 4
+   - 集成 Pinia 状态管理
+   - 集成 Axios HTTP 客户端
+   - 配置 Vue-i18n 国际化
+
+- [ ] 33. 实现道闸管理页面
+   - [ ] 33.1 道闸设备列表页
+   - [ ] 33.2 道闸设备详情/编辑页
+   - [ ] 33.3 车道管理页
+   - [ ] 33.4 道闸监控面板（实时状态）
+
+- [ ] 34. 实现支付管理页面
+   - [ ] 34.1 支付渠道列表页
+   - [ ] 34.2 支付渠道编辑页
+   - [ ] 34.3 费率规则配置页
+   - [ ] 34.4 交易流水查询页
+   - [ ] 34.5 交易订单详情页
+
+- [ ] 35. 实现车辆管理页面
+   - [ ] 35.1 车辆列表页（支持分页、搜索）
+   - [ ] 35.2 车辆注册/编辑页
+   - [ ] 35.3 月卡管理页
+   - [ ] 35.4 月卡开通/续期页
+   - [ ] 35.5 黑名单管理页
+
+- [ ] 36. 实现报表统计页面
+   - [ ] 36.1 通行记录查询页
+   - [ ] 36.2 收费日报页
+   - [ ] 36.3 收费月报页
+   - [ ] 36.4 日对账页
+
+- [ ] 37. 实现系统公共组件
+   - [ ] 37.1 登录页面
+   - [ ] 37.2 首页仪表盘
+   - [ ] 37.3 通用表格组件
+   - [ ] 37.4 通用表单组件
+   - [ ] 37.5 消息通知组件
+
+## 阶段九：联调与测试
+
+- [ ] 38. 配置前端反向代理
+   - 在 Vite 中配置代理解决跨域问题
+   - 代理 /api/barrier -> http://localhost:8081
+   - 代理 /api/payment -> http://localhost:8082
+   - 代理 /api/vehicle -> http://localhost:8083
+   - 代理 /api/report -> http://localhost:8084
+
+- [ ] 39. 编写集成测试
+   - [ ] 39.1 编写道闸服务集成测试
+   - [ ] 39.2 编写支付服务集成测试
+   - [ ] 39.3 编写车辆服务集成测试
+
+- [ ] 40. 验证核心业务流程
+   - 验证月卡车辆入场自动抬杆
+   - 验证临时车辆缴费后抬杆
+   - 验证黑名单车辆拒绝入场
+   - 验证各类支付方式正常交易
+
+- [ ] 41. 性能测试与优化
+   - 验证车牌识别到抬杆响应时间 ≤ 500ms
+   - 验证系统支持 100 并发用户
+
+## 阶段十：用户权限服务 (parking-uc) 开发
+
+- [ ] 42. 搭建 parking-uc 用户权限微服务框架
+   - 创建 Spring Boot 启动类和配置文件
+   - 配置 MyBatis-Plus、Redis 连接
+
+- [ ] 43. 实现用户管理
+   - [ ] 43.1 编写 User 实体类和 UserMapper
+     - 字段：id, username, password, nickname, phone, email, avatar, status, last_login_time
+   - [ ] 43.2 编写 UserService 业务类
+     - 实现用户注册功能（密码加密存储）
+     - 实现用户登录功能（JWT Token 生成）
+     - 实现用户信息查询和修改
+     - 实现密码修改和找回
+   
+   - [ ] 43.3 编写 UserController REST API
+     - POST /api/uc/v1/users/register 用户注册
+     - POST /api/uc/v1/users/login 用户登录
+     - GET /api/uc/v1/users/{id} 用户详情
+     - PUT /api/uc/v1/users/{id} 更新用户
+     - POST /api/uc/v1/users/{id}/password 修改密码
+
+- [ ] 44. 实现角色管理
+   - [ ] 44.1 编写 Role 实体类和 RoleMapper
+     - 字段：id, role_code, role_name, description, status
+   - [ ] 44.2 编写 RoleService 业务类
+     - 实现角色 CRUD
+     - 实现角色绑定菜单权限
+   
+   - [ ] 44.3 编写 RoleController REST API
+     - POST /api/uc/v1/roles 角色创建
+     - GET /api/uc/v1/roles 角色列表
+     - PUT /api/uc/v1/roles/{id} 角色更新
+     - DELETE /api/uc/v1/roles/{id} 角色删除
+
+- [ ] 45. 实现菜单权限管理
+   - [ ] 45.1 编写 Menu 实体类和 MenuMapper
+     - 字段：id, parent_id, menu_name, menu_type, path, component, icon, permission, sort_order
+     - menu_type: directory/menu/button
+   - [ ] 45.2 编写 MenuService 业务类
+     - 实现菜单树形结构查询
+     - 实现根据角色获取菜单权限
+   
+   - [ ] 45.3 编写 MenuController REST API
+     - POST /api/uc/v1/menus 菜单创建
+     - GET /api/uc/v1/menus/tree 菜单树形列表
+     - PUT /api/uc/v1/menus/{id} 菜单更新
+     - DELETE /api/uc/v1/menus/{id} 菜单删除
+
+- [ ] 46. 实现用户角色绑定
+   - [ ] 46.1 编写 UserRole 实体类和 UserRoleMapper
+   - [ ] 46.2 编写 UserRoleService 业务类
+     - 实现用户绑定角色
+     - 实现角色分配用户列表查询
+   - [ ] 46.3 编写 UserRoleController REST API
+     - POST /api/uc/v1/users/{userId}/roles 分配角色
+     - GET /api/uc/v1/users/{userId}/roles 获取用户角色
+
+- [ ] 47. 实现登录认证与权限校验
+   - [ ] 47.1 集成 JWT Token 认证
+     - 实现 Token 生成和验证
+     - 实现 Token 刷新机制
+     - 实现 Token 黑名单（退出登录）
+   
+   - [ ] 47.2 编写权限校验注解和拦截器
+     - @RequiredPermissions 注解
+     - 校验用户菜单权限
+
+## 阶段十一：车位管理服务 (parking-space) 开发
+
+- [ ] 48. 搭建 parking-space 车位管理微服务框架
+
+- [ ] 49. 实现停车场区域管理
+   - [ ] 49.1 编写 ParkingArea 实体类和 ParkingAreaMapper
+     - 字段：id, area_name, total_spaces, occupied_spaces, floor, status
+   - [ ] 49.2 编写 ParkingAreaService 业务类
+     - 实现区域 CRUD
+     - 实现车位统计更新
+   
+   - [ ] 49.3 编写 ParkingAreaController REST API
+     - POST /api/space/v1/areas 区域创建
+     - GET /api/space/v1/areas 区域列表
+     - PUT /api/space/v1/areas/{id} 区域更新
+     - DELETE /api/space/v1/areas/{id} 区域删除
+
+- [ ] 50. 实现车位管理
+   - [ ] 50.1 编写 ParkingSpace 实体类和 ParkingSpaceMapper
+     - 字段：id, space_number, area_id, space_type, status, vehicle_plate
+     - status: empty/occupied/reserved
+     - space_type: standard/large/disabled/electric
+   - [ ] 50.2 编写 ParkingSpaceService 业务类
+     - 实现车位 CRUD
+     - 实现车位状态查询
+     - 实现车位占用/释放
+   
+   - [ ] 50.3 编写 ParkingSpaceController REST API
+     - POST /api/space/v1/spaces 车位创建
+     - GET /api/space/v1/spaces 车位列表
+     - PUT /api/space/v1/spaces/{id} 车位更新
+     - DELETE /api/space/v1/spaces/{id} 车位删除
+     - GET /api/space/v1/spaces/status 车位状态统计
+
+- [ ] 51. 实现车位实时监控
+   - [ ] 51.1 编写 SpaceMonitorService 监控业务类
+     - 实时更新车位占用状态
+     - 推送车位变化事件到 Kafka
+   - [ ] 51.2 集成 Redis 实现车位状态缓存
+     - 使用 Redis Hash 存储实时车位状态
+     - 实现车位状态变更广播
+
+- [ ] 52. 实现车位引导功能
+   - [ ] 52.1 编写 GuideService 引导业务类
+     - 实现最短路径引导算法
+     - 生成车位引导指令
+   - [ ] 52.2 集成车位引导屏设备
+     - 实现引导信息下发
+     - 支持 LED/LCD 引导屏协议
+
+## 阶段十二：文件存储服务 (parking-oss) 开发
+
+- [ ] 53. 搭建 parking-oss 文件存储微服务框架
+
+- [ ] 54. 实现云存储适配器
+   - [ ] 54.1 定义 StorageAdapter 接口
+     - 定义上传、下载、删除、查询文件方法
+   - [ ] 54.2 编写抽象 AbstractStorageAdapter 基类
+     - 实现通用文件处理逻辑
+   - [ ] 54.3 实现七牛云存储适配器 QiniuStorageAdapter
+     - 集成七牛 SDK
+     - 实现文件上传到七牛云
+     - 实现文件访问 URL 生成
+     - 支持私有空间签名 URL
+   - [ ] 54.4 实现阿里云OSS适配器 AliyunStorageAdapter
+     - 集成阿里云 OSS SDK
+     - 实现文件上传到阿里云 OSS
+   - [ ] 54.5 实现腾讯云COS适配器 TencentStorageAdapter
+     - 集成腾讯云 COS SDK
+     - 实现文件上传到腾讯云 COS
+
+- [ ] 55. 实现文件管理功能
+   - [ ] 55.1 编写 FileInfo 实体类和 FileInfoMapper
+     - 字段：id, file_name, file_path, file_url, file_size, file_type, storage_type, bucket_name, created_by, created_at
+   - [ ] 55.2 编写 FileService 业务类
+     - 实现文件上传（自动选择云存储）
+     - 实现文件删除（同时删除云端文件）
+     - 实现文件查询（按用户、类型查询）
+   
+   - [ ] 55.3 编写 FileController REST API
+     - POST /api/oss/v1/files/upload 文件上传
+     - GET /api/oss/v1/files/{id} 文件信息
+     - DELETE /api/oss/v1/files/{id} 文件删除
+     - GET /api/oss/v1/files/list 文件列表
+
+- [ ] 56. 实现文件存储配置管理
+   - [ ] 56.1 编写 StorageConfig 实体类和 StorageConfigMapper
+     - 字段：id, config_key, provider, access_key, secret_key, bucket_name, endpoint, domain, status
+   - [ ] 56.2 编写 StorageConfigService 业务类
+     - 实现多云存储配置管理
+     - 实现配置启用/禁用
+   
+   - [ ] 56.3 编写 StorageConfigController REST API
+     - POST /api/oss/v1/configs 配置创建
+     - GET /api/oss/v1/configs 配置列表
+     - PUT /api/oss/v1/configs/{id} 配置更新
+     - DELETE /api/oss/v1/configs/{id} 配置删除
+
+## 阶段十三：发票服务 (parking-invoice) 开发
+
+- [ ] 57. 搭建 parking-invoice 发票微服务框架
+
+- [ ] 58. 实现发票抬头管理
+   - [ ] 58.1 编写 InvoiceTitle 实体类和 InvoiceTitleMapper
+     - 字段：id, user_id, title_type, company_name, tax_number, bank_name, bank_account, address, phone, email, is_default
+     - title_type: personal/enterprise
+   - [ ] 58.2 编写 InvoiceTitleService 业务类
+     - 实现发票抬头 CRUD
+     - 实现默认抬头设置
+   
+   - [ ] 58.3 编写 InvoiceTitleController REST API
+     - POST /api/invoice/v1/titles 抬头创建
+     - GET /api/invoice/v1/titles 抬头列表
+     - PUT /api/invoice/v1/titles/{id} 抬头更新
+     - DELETE /api/invoice/v1/titles/{id} 抬头删除
+     - PUT /api/invoice/v1/titles/{id}/default 设置默认
+
+- [ ] 59. 实现发票申请管理
+   - [ ] 59.1 编写 Invoice 实体类和 InvoiceMapper
+     - 字段：id, invoice_no, user_id, title_id, plate_number, amount, tax_amount, status, invoice_type, billing_time, sending_type
+     - status: pending/approved/issued/rejected
+     - invoice_type: normal/special
+     - sending_type: email/快递
+   - [ ] 59.2 编写 InvoiceService 业务类
+     - 实现发票申请创建
+     - 实现发票申请审批
+     - 实现发票开具（调用电子发票平台）
+     - 实现发票作废
+   
+   - [ ] 59.3 编写 InvoiceController REST API
+     - POST /api/invoice/v1/invoices 发票申请
+     - GET /api/invoice/v1/invoices 发票列表
+     - GET /api/invoice/v1/invoices/{id} 发票详情
+     - PUT /api/invoice/v1/invoices/{id}/approve 审批通过
+     - PUT /api/invoice/v1/invoices/{id}/reject 审批拒绝
+     - PUT /api/invoice/v1/invoices/{id}/issue 开具发票
+     - PUT /api/invoice/v1/invoices/{id}/cancel 作废发票
+
+- [ ] 60. 实现电子发票开具
+   - [ ] 60.1 定义 InvoiceIssuer 接口
+   - [ ] 60.2 实现电子发票平台对接
+     - 生成发票 PDF
+     - 推送到用户邮箱
+     - 提供发票查验接口
+
+## 阶段十四：视频监控服务 (parking-monitor) 开发
+
+- [ ] 61. 搭建 parking-monitor 视频监控微服务框架
+
+- [ ] 62. 实现摄像头设备管理
+   - [ ] 62.1 编写 Camera 实体类和 CameraMapper
+     - 字段：id, camera_code, camera_name, lane_id, ip_address, port, username, password, channel, stream_url, status
+   - [ ] 62.2 编写 CameraService 业务类
+     - 实现摄像头 CRUD
+     - 实现摄像头状态监控
+   
+   - [ ] 62.3 编写 CameraController REST API
+     - POST /api/monitor/v1/cameras 摄像头注册
+     - GET /api/monitor/v1/cameras 摄像头列表
+     - PUT /api/monitor/v1/cameras/{id} 摄像头更新
+     - DELETE /api/monitor/v1/cameras/{id} 摄像头删除
+
+- [ ] 63. 实现实时视频流
+   - [ ] 63.1 定义 VideoStreamProvider 接口
+   - [ ] 63.2 实现 RTSP 流媒体服务
+     - 集成 FFmpeg 流媒体处理
+     - 实现实时视频流拉取
+     - 支持 HLS/RTMP/WebRTC 输出
+   - [ ] 63.3 编写 VideoService 业务类
+     - 实现视频流地址获取
+     - 实现视频截图
+
+- [ ] 64. 实现视频录像管理
+   - [ ] 64.1 编写 VideoRecord 实体类和 VideoRecordMapper
+     - 字段：id, camera_id, start_time, end_time, file_path, file_size, record_type
+     - record_type: continuous/motion/alarm
+   - [ ] 64.2 编写 VideoRecordService 业务类
+     - 实现定时录像
+     - 实现录像回放
+     - 实现录像下载
+   
+   - [ ] 64.3 编写 VideoRecordController REST API
+     - GET /api/monitor/v1/records 录像列表
+     - GET /api/monitor/v1/records/{id}/playback 获取回放地址
+     - GET /api/monitor/v1/records/{id}/download 下载录像
+
+- [ ] 65. 实现报警管理
+   - [ ] 65.1 编写 Alarm 实体类和 AlarmMapper
+     - 字段：id, alarm_type, camera_id, lane_id, alarm_time, alarm_level, description, image_url, video_url, status
+   - [ ] 65.2 编写 AlarmService 业务类
+     - 实现报警记录
+     - 实现报警确认
+     - 实现报警统计
+   
+   - [ ] 65.3 编写 AlarmController REST API
+     - POST /api/monitor/v1/alarms 报警记录
+     - GET /api/monitor/v1/alarms 报警列表
+     - PUT /api/monitor/v1/alarms/{id}/confirm 确认报警
+
+## 阶段十五：扩展报表功能
+
+- [ ] 66. 实现账单管理
+   - [ ] 66.1 编写 Bill 实体类和 BillMapper
+     - 字段：id, bill_no, user_id, member_id, bill_type, amount, status, billing_date, due_date, paid_time
+   - [ ] 66.2 编写 BillService 业务类
+     - 实现月卡账单生成
+     - 实现账单查询
+     - 实现账单支付
+   
+   - [ ] 66.3 编写 BillController REST API
+     - GET /api/report/v1/bills 账单列表
+     - GET /api/report/v1/bills/{id} 账单详情
+     - POST /api/report/v1/bills/{id}/pay 账单支付
+
+- [ ] 67. 实现财务报表
+   - [ ] 67.1 编写 FinanceReportService 财务报业务类
+     - 收入统计日报、月报、年报
+     - 各支付渠道收入占比分析
+     - 现金收款与电子收款对比
+     - 退款和冲正统计
+   
+   - [ ] 67.2 实现财务对账单
+     - 日终对账文件生成
+     - 与支付渠道对账文件核对
+
+- [ ] 68. 实现经营分析报表
+   - [ ] 68.1 编写 BusinessAnalysisService 经营分析业务类
+     - 车流量分析（分时段、分日期）
+     - 车位利用率分析
+     - 月卡续费率分析
+     - 收费效率分析
+   
+   - [ ] 68.2 实现数据可视化
+     - 集成 ECharts 图表
+     - 支持导出 PDF 报表
+
+## 阶段十六：前端补充页面开发
+
+- [ ] 69. 实现用户权限页面
+   - [ ] 69.1 用户管理页面
+     - 用户列表、用户注册、用户编辑
+   - [ ] 69.2 角色管理页面
+     - 角色列表、角色创建、权限分配
+   - [ ] 69.3 菜单管理页面
+     - 菜单树形列表、菜单编辑
+
+- [ ] 70. 实现车位管理页面
+   - [ ] 70.1 停车场区域管理页面
+   - [ ] 70.2 车位管理页面（支持批量操作）
+   - [ ] 70.3 车位监控大屏页面
+     - 实时车位状态显示
+     - 车位引导信息发布
+
+- [ ] 71. 实现文件管理页面
+   - [ ] 71.1 云存储配置页面
+   - [ ] 71.2 文件管理页面（上传、预览、删除）
+
+- [ ] 72. 实现发票管理页面
+   - [ ] 72.1 发票抬头管理页面
+   - 72.2 发票申请页面
+   - [ ] 72.3 发票管理页面（审批、开具）
+   - [ ] 72.4 发票统计页面
+
+- [ ] 73. 实现视频监控页面
+   - [ ] 73.1 摄像头列表页面
+   - [ ] 73.2 实时视频预览页面
+   - [ ] 73.3 录像回放页面
+   - [ ] 73.4 报警列表页面
+
+- [ ] 74. 实现扩展报表页面
+   - [ ] 74.1 账单管理页面
+   - [ ] 74.2 财务报表页面
+   - [ ] 74.3 经营分析页面（含图表）
+   - [ ] 74.4 数据导出功能
+
+## 阶段十七：联调与测试
+
+- [ ] 75. 完善前端反向代理配置
+   - 代理 /api/uc -> http://localhost:8085
+   - 代理 /api/space -> http://localhost:8086
+   - 代理 /api/oss -> http://localhost:8087
+   - 代理 /api/invoice -> http://localhost:8088
+   - 代理 /api/monitor -> http://localhost:8089
+
+- [ ] 76. 编写服务间集成测试
+   - [ ] 76.1 测试车辆服务与道闸服务集成
+   - [ ] 76.2 测试支付服务与道闸服务集成
+   - [ ] 76.3 测试文件上传和云存储集成
+   - [ ] 76.4 测试发票开具流程
+
+- [ ] 77. 验证完整业务流程
+   - 验证月卡车辆入场自动抬杆
+   - 验证临时车辆缴费后抬杆
+   - 验证黑名单车辆拒绝入场
+   - 验证各类支付方式正常交易
+   - 验证电子发票开具和发送
+   - 验证实时视频监控
+
+## 阶段十八：部署配置
+
+- [ ] 78. 完善 Docker Compose 部署文件
+   - 添加所有新增微服务的 Dockerfile
+   - 配置 MySQL 库表初始化
+   - 配置 Redis 集群
+   - 配置 Kafka 集群
+   - 配置各个微服务环境变量
+
+- [ ] 79. 编写完整部署文档
+   - 编写环境要求说明
+   - 编写各云服务商配置指南
+   - 编写服务编排说明
+   - 编写运维手册（含日志查看、故障排查）
+   - 编写备份恢复方案
+
+---
+
+## 检查点
+
+- [ ] 检查点 1：确保所有服务启动成功，数据库连接正常
+- [ ] 检查点 2：确保 MyBatis-Plus 自动生成代码正常
+- [ ] 检查点 3：确保各微服务 API 接口可正常调用
+- [ ] 检查点 4：确保前端项目构建成功
+- [ ] 检查点 5：确保新增模块核心业务流程端到端测试通过
