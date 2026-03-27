@@ -19,7 +19,7 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<FileInfo>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,

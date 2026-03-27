@@ -2,8 +2,8 @@ package com.parking.common.core;
 
 import lombok.Data;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.io.Serializable;
 
 @Data

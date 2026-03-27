@@ -18,7 +18,7 @@ public class AlarmController {
         this.alarmService = alarmService;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<Alarm>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -33,7 +33,7 @@ public class AlarmController {
         return Result.success(alarmService.getById(id));
     }
 
-    @PostMapping
+@PostMapping
     public Result<Alarm> create(
             @RequestParam String alarmType,
             @RequestParam(required = false) Long cameraId,

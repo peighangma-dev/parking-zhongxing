@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
-// @RestController
 @RestController
 @RequestMapping("/api/vehicle/v1/members")
 public class MemberController {
@@ -22,7 +21,7 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @GetMapping
+    @GetMapping("/page")
     public Result<IPage<Member>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -32,17 +31,17 @@ public class MemberController {
         return Result.success(memberService.page(current, size, vehicleId, memberType, status));
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public Result<Member> getById(@PathVariable Long id) {
         return Result.success(memberService.getById(id));
     }
 
-    @GetMapping
+    @GetMapping("/vehicle/{vehicleId}")
     public Result<Member> getByVehicleId(@PathVariable Long vehicleId) {
         return Result.success(memberService.getByVehicleId(vehicleId));
     }
 
-    @GetMapping
+    @GetMapping("/check/{vehicleId}")
     public Result<Boolean> isValid(@PathVariable Long vehicleId) {
         return Result.success(memberService.isValid(vehicleId));
     }
@@ -52,14 +51,14 @@ public class MemberController {
         return Result.success(memberService.save(member));
     }
 
-    @GetMapping
+    @PutMapping("/{id}/renew")
     public Result<Member> renew(
             @PathVariable Long id,
             @RequestParam @DateTimeFormat LocalDate newEndDate) {
         return Result.success(memberService.renew(id, newEndDate));
     }
 
-    @GetMapping
+    @PutMapping("/{id}")
     public Result<Member> update(@PathVariable Long id, @RequestBody Member member) {
         member.setId(id);
         return Result.success(memberService.update(member));

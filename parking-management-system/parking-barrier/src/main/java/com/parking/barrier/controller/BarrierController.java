@@ -14,7 +14,7 @@ public class BarrierController {
 
     private final BarrierService barrierService;
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<Barrier>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -34,7 +34,7 @@ public class BarrierController {
         return Result.success(barrierService.getByCode(code));
     }
 
-    @PostMapping
+@PostMapping
     public Result<Barrier> save(@RequestBody Barrier barrier) {
         return Result.success(barrierService.save(barrier));
     }

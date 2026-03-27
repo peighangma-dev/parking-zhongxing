@@ -20,7 +20,7 @@ public class ParkingAreaController {
         this.areaService = areaService;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<ParkingArea>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -34,7 +34,7 @@ public class ParkingAreaController {
         return Result.success(areaService.getById(id));
     }
 
-    @PostMapping
+@PostMapping
     public Result<ParkingArea> save(@RequestBody ParkingArea area) {
         return Result.success(areaService.save(area));
     }

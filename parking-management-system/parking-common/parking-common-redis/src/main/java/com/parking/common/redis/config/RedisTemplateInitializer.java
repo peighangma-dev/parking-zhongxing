@@ -1,7 +1,7 @@
 package com.parking.common.redis.config;
 
 import com.parking.common.redis.utils.RedisUtils;
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;

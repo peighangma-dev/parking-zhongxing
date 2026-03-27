@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
-// @RestController
 @RestController
 @RequestMapping("/api/report/v1")
 public class ReportController {
@@ -26,7 +25,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @GetMapping
+    @GetMapping("/pass-records/page")
     public Result<IPage<PassRecord>> queryPassRecords(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -37,7 +36,7 @@ public class ReportController {
         return Result.success(reportService.queryPassRecords(current, size, plateNumber, passType, startTime, endTime));
     }
 
-    @GetMapping
+    @GetMapping("/pass-records/export")
     public Result<List<PassRecord>> exportPassRecords(
             @RequestParam(required = false) String plateNumber,
             @RequestParam(required = false) String passType,
@@ -46,7 +45,7 @@ public class ReportController {
         return Result.success(reportService.exportPassRecords(plateNumber, passType, startTime, endTime));
     }
 
-    @GetMapping
+    @GetMapping("/daily-summary")
     public Result<DailySummaryVO> getDailySummary(
             @RequestParam(required = false) 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -56,14 +55,14 @@ public class ReportController {
         return Result.success(reportService.getDailySummary(date));
     }
 
-    @GetMapping
+    @GetMapping("/monthly-summary")
     public Result<MonthlySummaryVO> getMonthlySummary(
             @RequestParam Integer year,
             @RequestParam Integer month) {
         return Result.success(reportService.getMonthlySummary(year, month));
     }
 
-    @GetMapping
+    @GetMapping("/reconcile")
     public Result<String> reconcile(
             @RequestParam(required = false) 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {

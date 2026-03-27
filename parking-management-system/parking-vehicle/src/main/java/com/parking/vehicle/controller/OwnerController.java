@@ -19,7 +19,7 @@ public class OwnerController {
         this.ownerService = ownerService;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<Owner>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -28,17 +28,17 @@ public class OwnerController {
         return Result.success(ownerService.page(current, size, name, phone));
     }
 
-    @GetMapping
+@GetMapping("/{id}")
     public Result<Owner> getById(@PathVariable Long id) {
         return Result.success(ownerService.getById(id));
     }
 
-    @PostMapping
+@PostMapping
     public Result<Owner> save(@RequestBody Owner owner) {
         return Result.success(ownerService.save(owner));
     }
 
-    @GetMapping
+    @PutMapping("/{id}")
     public Result<Owner> update(@PathVariable Long id, @RequestBody Owner owner) {
         owner.setId(id);
         return Result.success(ownerService.update(owner));

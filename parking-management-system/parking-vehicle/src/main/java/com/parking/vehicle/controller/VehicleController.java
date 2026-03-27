@@ -7,7 +7,6 @@ import com.parking.vehicle.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-// @RestController
 @RestController
 @RequestMapping("/api/vehicle/v1/vehicles")
 public class VehicleController {
@@ -19,7 +18,7 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-    @GetMapping
+    @GetMapping("/page")
     public Result<IPage<Vehicle>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -29,12 +28,12 @@ public class VehicleController {
         return Result.success(vehicleService.page(current, size, plateNumber, vehicleTypeCat, status));
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public Result<Vehicle> getById(@PathVariable Long id) {
         return Result.success(vehicleService.getById(id));
     }
 
-    @GetMapping
+    @GetMapping("/plate/{plateNumber}")
     public Result<Vehicle> getByPlateNumber(@PathVariable String plateNumber) {
         return Result.success(vehicleService.getByPlateNumber(plateNumber));
     }
@@ -44,7 +43,7 @@ public class VehicleController {
         return Result.success(vehicleService.save(vehicle));
     }
 
-    @GetMapping
+    @PutMapping("/{id}")
     public Result<Vehicle> update(@PathVariable Long id, @RequestBody Vehicle vehicle) {
         vehicle.setId(id);
         return Result.success(vehicleService.update(vehicle));

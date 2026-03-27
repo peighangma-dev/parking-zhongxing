@@ -18,7 +18,7 @@ public class CameraController {
         this.cameraService = cameraService;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<Camera>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -33,7 +33,7 @@ public class CameraController {
         return Result.success(cameraService.getById(id));
     }
 
-    @PostMapping
+@PostMapping
     public Result<Camera> save(@RequestBody Camera camera) {
         return Result.success(cameraService.save(camera));
     }

@@ -19,7 +19,7 @@ public class PaymentChannelController {
         this.channelMapper = channelMapper;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<PaymentChannel>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size) {
@@ -27,25 +27,25 @@ public class PaymentChannelController {
         return Result.success(channelMapper.selectPage(page, null));
     }
 
-    @GetMapping
+@GetMapping("/{id}")
     public Result<PaymentChannel> getById(@PathVariable Long id) {
         return Result.success(channelMapper.selectById(id));
     }
 
-    @PostMapping
+@PostMapping
     public Result<PaymentChannel> save(@RequestBody PaymentChannel channel) {
         channelMapper.insert(channel);
         return Result.success(channel);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public Result<PaymentChannel> update(@PathVariable Long id, @RequestBody PaymentChannel channel) {
         channel.setId(id);
         channelMapper.updateById(channel);
         return Result.success(channel);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(channelMapper.deleteById(id) > 0);
     }

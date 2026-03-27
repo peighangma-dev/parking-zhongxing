@@ -7,7 +7,6 @@ import com.parking.vehicle.service.BlacklistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-// @RestController
 @RestController
 @RequestMapping("/api/vehicle/v1/blacklist")
 public class BlacklistController {
@@ -19,7 +18,7 @@ public class BlacklistController {
         this.blacklistService = blacklistService;
     }
 
-    @GetMapping
+    @GetMapping("/page")
     public Result<IPage<Blacklist>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -27,12 +26,12 @@ public class BlacklistController {
         return Result.success(blacklistService.page(current, size, vehicleId));
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public Result<Blacklist> getById(@PathVariable Long id) {
         return Result.success(blacklistService.getById(id));
     }
 
-    @GetMapping
+    @GetMapping("/check/{vehicleId}")
     public Result<Boolean> isBlacklisted(@PathVariable Long vehicleId) {
         return Result.success(blacklistService.isBlacklisted(vehicleId));
     }
@@ -45,7 +44,7 @@ public class BlacklistController {
         return Result.success(blacklistService.add(vehicleId, reason, operatorId));
     }
 
-    @GetMapping
+    @DeleteMapping("/{id}")
     public Result<Boolean> remove(@PathVariable Long id) {
         return Result.success(blacklistService.remove(id));
     }

@@ -19,7 +19,7 @@ public class RateRuleController {
         this.rateRuleMapper = rateRuleMapper;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<RateRule>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size) {
@@ -32,7 +32,7 @@ public class RateRuleController {
         return Result.success(rateRuleMapper.selectById(id));
     }
 
-    @PostMapping
+@PostMapping
     public Result<RateRule> save(@RequestBody RateRule rateRule) {
         rateRuleMapper.insert(rateRule);
         return Result.success(rateRule);

@@ -20,7 +20,7 @@ public class ParkingSpaceController {
         this.spaceService = spaceService;
     }
 
-    @GetMapping
+@GetMapping("/page")
     public Result<IPage<ParkingSpace>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -35,7 +35,7 @@ public class ParkingSpaceController {
         return Result.success(spaceService.getById(id));
     }
 
-    @PostMapping
+@PostMapping
     public Result<ParkingSpace> save(@RequestBody ParkingSpace space) {
         return Result.success(spaceService.save(space));
     }
