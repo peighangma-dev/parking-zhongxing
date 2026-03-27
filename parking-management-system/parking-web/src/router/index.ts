@@ -37,6 +37,16 @@ const router = createRouter({
           path: '/vehicle/member',
           name: 'VehicleMember',
           component: () => import('@/views/vehicle/Member.vue')
+        },
+        {
+          path: '/uc/user',
+          name: 'UserManage',
+          component: () => import('@/views/uc/UserManage.vue')
+        },
+        {
+          path: '/uc/parking-lot',
+          name: 'ParkingLotManage',
+          component: () => import('@/views/uc/ParkingLotManage.vue')
         }
       ]
     }

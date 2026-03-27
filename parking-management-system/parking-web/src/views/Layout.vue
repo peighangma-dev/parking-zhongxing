@@ -33,6 +33,14 @@
           <el-menu-item index="/vehicle/list">车辆列表</el-menu-item>
           <el-menu-item index="/vehicle/member">月卡管理</el-menu-item>
         </el-sub-menu>
+        <el-sub-menu index="/uc">
+          <template #title>
+            <el-icon><User /></el-icon>
+            <span>系统管理</span>
+          </template>
+          <el-menu-item index="/uc/user">用户管理</el-menu-item>
+          <el-menu-item index="/uc/parking-lot">停车场管理</el-menu-item>
+        </el-sub-menu>
       </el-menu>
     </el-aside>
     <el-container>
