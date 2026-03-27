@@ -36,12 +36,12 @@ const form = reactive({
 const handleLogin = async () => {
   loading.value = true
   try {
-    const data = await request.post('/uc/v1/users/login', null, {
+    const res = await request.get('/uc/v1/login', {
       params: form
     })
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('userId', data.userId)
-    localStorage.setItem('username', data.username)
+    localStorage.setItem('token', res.data.token)
+    localStorage.setItem('userId', res.data.userId)
+    localStorage.setItem('username', res.data.username)
     router.push('/')
   } finally {
     loading.value = false
