@@ -1,69 +1,97 @@
 package com.parking.uc.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class JwtUtils {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:parking-system-secret-key}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration:86400000}")
     private Long expiration;
-
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
 
     public String generateToken(Long userId, String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("username", username);
-        return Jwts.builder()
-                .claims(claims)
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey())
-                .compact();
-    }
-
-    public Claims parseToken(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        long now = System.currentTimeMillis();
+        long exp = now + expiration;
+        
+        String header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+        String payload = "{\"userId\":" + userId + ",\"username\":\"" + username + "\",\"iat\":" + (now/1000) + ",\"exp\":" + (exp/1000) + "}";
+        
+        String content = base64UrlEncode(header) + "." + base64UrlEncode(payload);
+        String signature = sign(content, secret);
+        return content + "." + signature;
     }
 
     public boolean validateToken(String token) {
         try {
-            parseToken(token);
-            return true;
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return false;
+            String signature = sign(parts[0] + "." + parts[1], secret);
+            return signature.equals(parts[2]);
         } catch (Exception e) {
             return false;
         }
     }
 
     public Long getUserIdFromToken(String token) {
-        Claims claims = parseToken(token);
-        return claims.get("userId", Long.class);
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return null;
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            int userIdIndex = payload.indexOf("\"userId\":");
+            if (userIdIndex == -1) return null;
+            String userIdStr = payload.substring(userIdIndex + 8);
+            int end = userIdStr.indexOf(",");
+            if (end == -1) end = userIdStr.indexOf("}");
+            return Long.parseLong(userIdStr.substring(0, end).trim());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getUsernameFromToken(String token) {
-        Claims claims = parseToken(token);
-        return claims.getSubject();
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return null;
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            int usernameIndex = payload.indexOf("\"username\":\"");
+            if (usernameIndex == -1) return null;
+            String usernameStr = payload.substring(usernameIndex + 12);
+            int end = usernameStr.indexOf("\"");
+            return usernameStr.substring(0, end);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String base64UrlEncode(String text) {
+        return Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(text.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String sign(String data, String key) {
+        try {
+            Mac sha256Hmac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            sha256Hmac.init(secretKeySpec);
+            byte[] hash = sha256Hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return base64UrlEncode(new String(hash));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

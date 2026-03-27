@@ -10,7 +10,6 @@ import com.parking.oss.adapter.LocalStorageAdapter;
 import com.parking.oss.entity.FileInfo;
 import com.parking.oss.mapper.FileInfoMapper;
 import com.parking.oss.service.FileService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -22,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class FileServiceImpl implements FileService {
 
     private final FileInfoMapper fileInfoMapper;

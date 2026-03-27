@@ -86,7 +86,7 @@ public class ParkingSpaceServiceImpl implements ParkingSpaceService {
     public boolean occupy(Long id, String plateNumber) {
         ParkingSpace space = getById(id);
         if (!"empty".equals(space.getStatus())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "车位不是空闲状态");
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "车位不是空闲状态");
         }
         space.setStatus("occupied");
         space.setVehiclePlate(plateNumber);
@@ -97,7 +97,7 @@ public class ParkingSpaceServiceImpl implements ParkingSpaceService {
     public boolean release(Long id) {
         ParkingSpace space = getById(id);
         if (!"occupied".equals(space.getStatus())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "车位不是占用状态");
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "车位不是占用状态");
         }
         space.setStatus("empty");
         space.setVehiclePlate(null);

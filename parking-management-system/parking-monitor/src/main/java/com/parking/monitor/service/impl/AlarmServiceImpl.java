@@ -67,7 +67,7 @@ public class AlarmServiceImpl implements AlarmService {
     public boolean confirmAlarm(Long id, Long confirmedBy) {
         Alarm alarm = getById(id);
         if (!"pending".equals(alarm.getStatus())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "只能确认待处理的报警");
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "只能确认待处理的报警");
         }
         alarm.setStatus("confirmed");
         alarm.setConfirmedBy(confirmedBy);

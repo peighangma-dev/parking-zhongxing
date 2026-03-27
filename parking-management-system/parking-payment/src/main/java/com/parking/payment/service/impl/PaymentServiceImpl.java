@@ -130,7 +130,7 @@ public class PaymentServiceImpl implements PaymentService {
     public boolean refund(String orderNo, BigDecimal amount) {
         Payment payment = getByOrderNo(orderNo);
         if (!"paid".equals(payment.getPaymentStatus())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "只能退款已支付的订单");
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "只能退款已支付的订单");
         }
         payment.setPaymentStatus("refunded");
         paymentMapper.updateById(payment);

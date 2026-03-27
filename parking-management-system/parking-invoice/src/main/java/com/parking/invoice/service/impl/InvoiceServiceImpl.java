@@ -125,7 +125,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public boolean approveInvoice(Long id) {
         Invoice invoice = getInvoiceById(id);
         if (!"pending".equals(invoice.getStatus())) {
-            throw new BusinessException(ErrorCode.INVOICE_ISSUED, "只能审批待处理的发票");
+            throw new BusinessException(ErrorCode.INVOICE_ISSUED.getCode(), "只能审批待处理的发票");
         }
         invoice.setStatus("approved");
         return invoiceMapper.updateById(invoice) > 0;
@@ -135,7 +135,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public boolean rejectInvoice(Long id, String reason) {
         Invoice invoice = getInvoiceById(id);
         if (!"pending".equals(invoice.getStatus())) {
-            throw new BusinessException(ErrorCode.INVOICE_ISSUED, "只能拒绝待处理的发票");
+            throw new BusinessException(ErrorCode.INVOICE_ISSUED.getCode(), "只能拒绝待处理的发票");
         }
         invoice.setStatus("rejected");
         return invoiceMapper.updateById(invoice) > 0;
@@ -145,7 +145,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public boolean issueInvoice(Long id) {
         Invoice invoice = getInvoiceById(id);
         if (!"approved".equals(invoice.getStatus())) {
-            throw new BusinessException(ErrorCode.INVOICE_ISSUED, "只能开具已审批的发票");
+            throw new BusinessException(ErrorCode.INVOICE_ISSUED.getCode(), "只能开具已审批的发票");
         }
         invoice.setStatus("issued");
         invoice.setBillingTime(LocalDateTime.now());
@@ -157,7 +157,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public boolean cancelInvoice(Long id) {
         Invoice invoice = getInvoiceById(id);
         if ("issued".equals(invoice.getStatus())) {
-            throw new BusinessException(ErrorCode.INVOICE_CANCELLED, "已开具的发票不能取消");
+            throw new BusinessException(ErrorCode.INVOICE_CANCELLED.getCode(), "已开具的发票不能取消");
         }
         invoice.setStatus("cancelled");
         return invoiceMapper.updateById(invoice) > 0;

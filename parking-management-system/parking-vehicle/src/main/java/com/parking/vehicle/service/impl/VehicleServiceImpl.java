@@ -74,7 +74,7 @@ public class VehicleServiceImpl implements VehicleService {
         LambdaQueryWrapper<Vehicle> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Vehicle::getPlateNumber, vehicle.getPlateNumber());
         if (vehicleMapper.selectCount(wrapper) > 0) {
-            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "车牌号已存在");
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "车牌号已存在");
         }
         vehicleMapper.insert(vehicle);
         return vehicle;

@@ -1,25 +1,23 @@
 package com.parking.common.core;
 
-import cn.hutool.core.util.StrUtil;
-
 import java.util.UUID;
 
-public class StringUtils extends cn.hutool.core.util.StrUtil {
+public class StringUtils {
 
     public static boolean isBlank(String str) {
-        return StrUtil.isBlank(str);
+        return str == null || str.trim().isEmpty();
     }
 
     public static boolean isNotBlank(String str) {
-        return StrUtil.isNotBlank(str);
+        return !isBlank(str);
     }
 
     public static boolean isEmpty(String str) {
-        return StrUtil.isEmpty(str);
+        return str == null || str.isEmpty();
     }
 
     public static boolean isNotEmpty(String str) {
-        return StrUtil.isNotEmpty(str);
+        return !isEmpty(str);
     }
 
     public static String trim(String str) {
@@ -27,23 +25,42 @@ public class StringUtils extends cn.hutool.core.util.StrUtil {
     }
 
     public static String defaultIfBlank(String str, String defaultStr) {
-        return StrUtil.defaultIfBlank(str, defaultStr);
+        return isBlank(str) ? defaultStr : str;
     }
 
     public static String defaultIfEmpty(String str, String defaultStr) {
-        return StrUtil.defaultIfEmpty(str, defaultStr);
+        return isEmpty(str) ? defaultStr : str;
     }
 
     public static String format(String template, Object... params) {
-        return StrUtil.format(template, params);
+        if (template == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        int index = 0;
+        for (int i = 0; i < template.length(); i++) {
+            char c = template.charAt(i);
+            if (c == '{' && index < params.length) {
+                sb.append(params[index++]);
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     public static String capitalize(String str) {
-        return StrUtil.capitalize(str);
+        if (isEmpty(str)) {
+            return str;
+        }
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 
     public static String uncapitalize(String str) {
-        return StrUtil.uncapitalize(str);
+        if (isEmpty(str)) {
+            return str;
+        }
+        return Character.toLowerCase(str.charAt(0)) + str.substring(1);
     }
 
     public static String upperCase(String str) {
@@ -55,19 +72,34 @@ public class StringUtils extends cn.hutool.core.util.StrUtil {
     }
 
     public static String sub(String str, int fromIndex, int toIndex) {
-        return StrUtil.sub(str, fromIndex, toIndex);
+        if (str == null) {
+            return null;
+        }
+        if (fromIndex < 0) fromIndex = 0;
+        if (toIndex > str.length()) toIndex = str.length();
+        if (fromIndex > toIndex) return "";
+        return str.substring(fromIndex, toIndex);
     }
 
     public static boolean contains(CharSequence sequence, CharSequence searchSeq) {
-        return StrUtil.contains(sequence, searchSeq);
+        if (sequence == null || searchSeq == null) {
+            return false;
+        }
+        return sequence.toString().contains(searchSeq);
     }
 
     public static boolean containsIgnoreCase(CharSequence str, CharSequence searchStr) {
-        return StrUtil.containsIgnoreCase(str, searchStr);
+        if (str == null || searchStr == null) {
+            return false;
+        }
+        return str.toString().toLowerCase().contains(searchStr.toString().toLowerCase());
     }
 
     public static String replace(String text, String searchString, String replacement) {
-        return StrUtil.replace(text, searchString, replacement);
+        if (isEmpty(text) || isEmpty(searchString)) {
+            return text;
+        }
+        return text.replace(searchString, replacement == null ? "" : replacement);
     }
 
     public static String generateUUID() {

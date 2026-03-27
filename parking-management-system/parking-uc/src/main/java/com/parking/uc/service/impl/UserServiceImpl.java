@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
         if (!"normal".equals(user.getStatus())) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "用户已被禁用");
+            throw new BusinessException(ErrorCode.FORBIDDEN.getCode(), "用户已被禁用");
         }
         String token = jwtUtils.generateToken(user.getId(), user.getUsername());
         Map<String, Object> result = new HashMap<>();

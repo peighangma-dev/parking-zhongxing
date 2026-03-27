@@ -47,7 +47,7 @@
         <wechat.pay.version>2.0.6</wechat.pay.version>
         <alipay.sdk.version>4.35.180.ALL</alipay.sdk.version>
         <easyexcel.version>3.3.5</easyexcel.version>
-        <swagger.version>2.2.23</swagger.version>
+        <swagger.version>2.0.4</swagger.version>
         <lombok.version>1.18.32</lombok.version>
         <testcontainers.version>1.19.8</testcontainers.version>
     </properties>
@@ -148,17 +148,23 @@
                 <version>${alipay.sdk.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>easyexcel</artifactId>
-                <version>${easyexcel.version}</version>
-            </dependency>
+            <!--<dependency>-->
+            <!--    <groupId>com.alibaba</groupId>-->
+            <!--    <artifactId>easyexcel</artifactId>-->
+            <!--    <version>${easyexcel.version}</version>-->
+            <!--</dependency>-->
 
-            <dependency>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
+            <!--<dependency>-->
+            <!--    <groupId>org.springdoc</groupId>-->
+            <!--    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
+            <!--    <version>${swagger.version}</version>-->
+            <!--</dependency>-->
+
+            <!--<dependency>-->
+            <!--    <groupId>io.swagger.core.v3</groupId>-->
+            <!--    <artifactId>swagger-annotations</artifactId>-->
+            <!--    <version>2.2.23</version>-->
+            <!--</dependency>-->
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
