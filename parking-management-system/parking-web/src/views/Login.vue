@@ -39,9 +39,9 @@ const handleLogin = async () => {
     const res = await request.get('/uc/v1/login', {
       params: form
     })
-    localStorage.setItem('token', res.data.token)
-    localStorage.setItem('userId', res.data.userId)
-    localStorage.setItem('username', res.data.username)
+    localStorage.setItem('token', res.token)
+    localStorage.setItem('userId', res.userId)
+    localStorage.setItem('username', res.username)
     router.push('/')
   } finally {
     loading.value = false

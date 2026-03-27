@@ -108,8 +108,8 @@ const loadData = async () => {
         username: queryForm.username || undefined
       }
     })
-    tableData.value = res.data.records
-    pagination.total = res.data.total
+    tableData.value = res.records || []
+    pagination.total = res.total || 0
   } catch (error) {
     console.error('Failed to load data:', error)
   }
