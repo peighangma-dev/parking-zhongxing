@@ -34,8 +34,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring-boot.version>3.2.5</spring-boot.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <mybatis-plus.version>3.5.8</mybatis-plus.version>
         <redisson.version>3.37.0</redisson.version>
         <hutool.version>5.8.29</hutool.version>
         <fastjson2.version>2.0.52</fastjson2.version>

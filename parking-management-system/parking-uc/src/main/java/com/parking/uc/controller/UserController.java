@@ -20,14 +20,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
+    @GetMapping("/login")
     public Result<Map<String, Object>> login(
             @RequestParam String username,
             @RequestParam String password) {
         return Result.success(userService.login(username, password));
     }
 
-    @GetMapping
+    @GetMapping("/current")
     public Result<SysUser> getCurrentUser(@RequestHeader("Authorization") String token) {
         return Result.success(null);
     }
