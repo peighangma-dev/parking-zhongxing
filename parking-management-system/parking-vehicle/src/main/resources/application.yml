@@ -6,9 +6,9 @@ spring:
     name: parking-vehicle
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=${DB_USE_SSL:false}&requireSSL=${DB_REQUIRE_SSL:false}
     username: ${DB_USERNAME:parking}
-    password: ${DB_PASSWORD:parking123}
+    password: ${DB_PASSWORD:}
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -30,7 +30,6 @@ mybatis-plus:
   type-aliases-package: com.parking.vehicle.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       logic-delete-field: deleted
@@ -39,13 +38,11 @@ mybatis-plus:
 
 springdoc:
   api-docs:
-    enabled: true
-    path: /v3/api-docs
+    enabled: false
   swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
+    enabled: false
 
 logging:
   level:
-    com.parking: DEBUG
-    org.springframework: INFO
+    com.parking: INFO
+    org.springframework: WARN

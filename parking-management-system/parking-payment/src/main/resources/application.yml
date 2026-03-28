@@ -6,9 +6,9 @@ spring:
     name: parking-payment
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=${DB_USE_SSL:false}&requireSSL=${DB_REQUIRE_SSL:false}
     username: ${DB_USERNAME:parking}
-    password: ${DB_PASSWORD:parking123}
+    password: ${DB_PASSWORD:}
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -28,16 +28,16 @@ mybatis-plus:
 
 payment:
   callback:
-    secret: ${PAYMENT_CALLBACK_SECRET:payment-callback-secret-key}
+    secret: ${PAYMENT_CALLBACK_SECRET:}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized
   metrics:
     tags:
       application: ${spring.application.name}
@@ -45,8 +45,9 @@ management:
 springcloud:
   sleuth:
     zipkin:
-      base-url: ${ZIPKIN_BASE_URL:http://localhost:9411}
+      base-url: ${ZIPKIN_BASE_URL:}
 
 logging:
   level:
-    com.parking: DEBUG
+    com.parking: INFO
+    org.springframework: WARN
