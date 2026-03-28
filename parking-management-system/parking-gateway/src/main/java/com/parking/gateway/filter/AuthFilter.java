@@ -19,7 +19,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
         
-        if (path.startsWith("/api/uc/v1/users/login") || 
+        if (path.startsWith("/api/uc/v1/login") || 
+            path.startsWith("/api/uc/v1/users/login") || 
             path.startsWith("/swagger") ||
             path.startsWith("/v3/api-docs") ||
             path.startsWith("/actuator")) {
