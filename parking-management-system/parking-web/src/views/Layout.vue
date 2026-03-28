@@ -96,6 +96,12 @@
             </template>
             <el-menu-item index="/uc/user">用户管理</el-menu-item>
             <el-menu-item index="/uc/role">角色管理</el-menu-item>
+            <el-menu-item index="/uc/menu">菜单管理</el-menu-item>
+            <el-divider style="margin: 5px 0" />
+            <el-menu-item index="/uc/operation-log">操作日志</el-menu-item>
+            <el-menu-item index="/uc/login-log">登录日志</el-menu-item>
+            <el-divider style="margin: 5px 0" />
+            <el-menu-item index="/uc/system-config">系统配置</el-menu-item>
           </el-sub-menu>
 
           <el-sub-menu index="/admin">
@@ -246,6 +252,10 @@ const pageTitleMap: Record<string, string> = {
   '/report/monthly': '收费月报',
   '/uc/user': '用户管理',
   '/uc/role': '角色管理',
+  '/uc/menu': '菜单管理',
+  '/uc/operation-log': '操作日志',
+  '/uc/login-log': '登录日志',
+  '/uc/system-config': '系统配置',
   '/admin/tenant': '租户管理',
   '/admin/package': '套餐管理',
 }

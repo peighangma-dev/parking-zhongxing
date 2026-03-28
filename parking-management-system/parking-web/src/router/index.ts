@@ -119,6 +119,30 @@ const router = createRouter({
           meta: { requiresAuth: true }
         },
         {
+          path: '/uc/menu',
+          name: 'MenuManage',
+          component: () => import('@/views/uc/MenuManage.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: '/uc/operation-log',
+          name: 'OperationLog',
+          component: () => import('@/views/uc/OperationLog.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: '/uc/login-log',
+          name: 'LoginLog',
+          component: () => import('@/views/uc/LoginLog.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: '/uc/system-config',
+          name: 'SystemConfig',
+          component: () => import('@/views/uc/SystemConfig.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
           path: '/admin/tenant',
           name: 'TenantManage',
           component: () => import('@/views/admin/Tenant.vue'),
