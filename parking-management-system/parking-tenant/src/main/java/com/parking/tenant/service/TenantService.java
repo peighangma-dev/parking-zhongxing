@@ -60,9 +60,8 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         return this.page(page, wrapper);
     }
 
-    @Override
-    public Tenant getById(Long id) {
-        Tenant tenant = super.getById(id);
+    public Tenant getByIdTenant(Long id) {
+        Tenant tenant = this.getById(id);
         if (tenant == null) {
             throw new RuntimeException("租户不存在");
         }
@@ -81,16 +80,19 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
     }
 
     public Tenant update(Long id, Tenant tenant) {
-        Tenant existing = getById(id);
+        Tenant existing = this.getById(id);
+        if (existing == null) {
+            throw new RuntimeException("租户不存在");
+        }
         tenant.setId(id);
         tenant.setTenantCode(null);
         tenant.setCreatedAt(null);
         this.updateById(tenant);
-        return getById(id);
+        return this.getByIdTenant(id);
     }
 
     public Boolean delete(Long id) {
-        getById(id);
-        return this.removeById(id);
+        this.removeById(id);
+        return true;
     }
 }

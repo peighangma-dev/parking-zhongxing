@@ -47,7 +47,7 @@ public class TenantController {
 
     @GetMapping("/{id}")
     public Result<Tenant> getById(@PathVariable Long id) {
-        return Result.success(tenantService.getById(id));
+        return Result.success(tenantService.getByIdTenant(id));
     }
 
     @PostMapping
@@ -62,7 +62,8 @@ public class TenantController {
 
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable Long id) {
-        return Result.success(tenantService.delete(id));
+        tenantService.delete(id);
+        return Result.success(true);
     }
 
     @PutMapping("/status/{id}")
@@ -131,10 +132,5 @@ public class TenantController {
     @GetMapping("/info/{tenantCode}")
     public Result<Tenant> getTenantInfo(@PathVariable String tenantCode) {
         return Result.success(tenantService.getByCode(tenantCode));
-    }
-
-    @GetMapping("/features/{tenantId}")
-    public Result<List<String>> getFeatures(@PathVariable Long tenantId) {
-        return Result.success(tenantService.getEnabledFeatures(tenantId));
     }
 }
