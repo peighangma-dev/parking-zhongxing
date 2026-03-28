@@ -24,6 +24,7 @@
         <module>parking-oss</module>
         <module>parking-invoice</module>
         <module>parking-monitor</module>
+        <module>parking-tenant</module>
     </modules>
 
     <properties>
