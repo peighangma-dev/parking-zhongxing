@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS pass_record (
     fee_calculated DECIMAL(10,2) DEFAULT NULL COMMENT '计算费用',
     pass_time DATETIME NOT NULL COMMENT '通行时间',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (id),
     KEY idx_plate_number (plate_number),
@@ -136,6 +137,8 @@ CREATE TABLE IF NOT EXISTS payment_channel (
     channel_code VARCHAR(32) NOT NULL COMMENT '渠道编码',
     channel_name VARCHAR(64) NOT NULL COMMENT '渠道名称',
     fee_rate DECIMAL(5,4) DEFAULT 0 COMMENT '手续费率',
+    config TEXT COMMENT '渠道配置JSON',
+    description VARCHAR(256) COMMENT '描述',
     status VARCHAR(16) NOT NULL DEFAULT 'enabled' COMMENT '状态: enabled/disabled',
     sort_order INT DEFAULT 0 COMMENT '排序',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -255,10 +258,12 @@ CREATE TABLE IF NOT EXISTS sys_menu (
     icon VARCHAR(64) DEFAULT NULL COMMENT '图标',
     permission VARCHAR(128) DEFAULT NULL COMMENT '权限标识',
     sort_order INT DEFAULT 0 COMMENT '排序',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='菜单权限表';
 
 -- ----------------------------
@@ -288,7 +293,21 @@ CREATE TABLE IF NOT EXISTS sys_role_menu (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色菜单关联表';
 
 -- ----------------------------
--- 16. 停车场区域表
+-- 16. 套餐功能表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS sys_package_feature (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    package_id BIGINT NOT NULL COMMENT '套餐ID',
+    feature_code VARCHAR(64) NOT NULL COMMENT '功能代码',
+    feature_name VARCHAR(128) NOT NULL COMMENT '功能名称',
+    enabled TINYINT DEFAULT 1 COMMENT '是否启用: 0-否 1-是',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (id),
+    KEY idx_package_id (package_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='套餐功能表';
+
+-- ----------------------------
+-- 17. 停车场区域表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS parking_area (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
