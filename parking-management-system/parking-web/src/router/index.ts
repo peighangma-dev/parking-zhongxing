@@ -24,9 +24,19 @@ const router = createRouter({
           component: () => import('@/views/barrier/Device.vue')
         },
         {
+          path: '/barrier/lane',
+          name: 'BarrierLane',
+          component: () => import('@/views/barrier/Lane.vue')
+        },
+        {
           path: '/payment/channel',
           name: 'PaymentChannel',
           component: () => import('@/views/payment/Channel.vue')
+        },
+        {
+          path: '/payment/rate',
+          name: 'PaymentRate',
+          component: () => import('@/views/payment/Rate.vue')
         },
         {
           path: '/vehicle/list',
@@ -37,6 +47,31 @@ const router = createRouter({
           path: '/vehicle/member',
           name: 'VehicleMember',
           component: () => import('@/views/vehicle/Member.vue')
+        },
+        {
+          path: '/vehicle/blacklist',
+          name: 'VehicleBlacklist',
+          component: () => import('@/views/vehicle/Blacklist.vue')
+        },
+        {
+          path: '/space/area',
+          name: 'SpaceArea',
+          component: () => import('@/views/space/Area.vue')
+        },
+        {
+          path: '/space/space',
+          name: 'SpaceSpace',
+          component: () => import('@/views/space/Space.vue')
+        },
+        {
+          path: '/report/pass',
+          name: 'ReportPass',
+          component: () => import('@/views/report/PassRecord.vue')
+        },
+        {
+          path: '/report/daily',
+          name: 'ReportDaily',
+          component: () => import('@/views/report/DailyReport.vue')
         },
         {
           path: '/uc/user',
