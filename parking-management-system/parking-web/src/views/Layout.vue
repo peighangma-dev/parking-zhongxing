@@ -128,6 +128,10 @@
           </div>
         </div>
         <div class="header-right">
+          <div class="tenant-info">
+            <span class="tenant-label">租户:</span>
+            <span class="tenant-name">{{ tenantName }}</span>
+          </div>
           <div class="user-info">
             <div class="user-avatar">
               <el-icon><UserFilled /></el-icon>
@@ -152,12 +156,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useFeaturePermission, FEATURE_CODES } from '@/utils/featurePermission'
 
 const router = useRouter()
 const route = useRoute()
 const username = computed(() => localStorage.getItem('username') || 'Admin')
+const tenantId = computed(() => localStorage.getItem('tenantId') || '1')
+const tenantName = computed(() => localStorage.getItem('tenantName') || '演示租户')
+const { loadFeatures, hasFeature } = useFeaturePermission()
+
+onMounted(async () => {
+  const tid = Number(tenantId.value)
+  if (tid) {
+    await loadFeatures(tid)
+  }
+})
 
 const pageTitleMap: Record<string, string> = {
   '/dashboard': '数据概览',
@@ -476,6 +491,30 @@ const handleLogout = () => {
   font-weight: 600;
   letter-spacing: 1px;
   border-radius: 6px;
+}
+
+.tenant-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  background: rgba(255, 0, 255, 0.1);
+  border: 1px solid rgba(255, 0, 255, 0.3);
+  border-radius: 8px;
+}
+
+.tenant-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  color: var(--cyber-magenta);
+}
+
+.tenant-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cyber-magenta);
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
 }
 
 .main-content {

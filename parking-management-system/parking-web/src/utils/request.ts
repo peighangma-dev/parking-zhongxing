@@ -19,6 +19,10 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    const tenantId = localStorage.getItem('tenantId')
+    if (tenantId) {
+      config.headers['X-Tenant-Id'] = tenantId
+    }
     return config
   },
   (error) => {
@@ -40,6 +44,8 @@ request.interceptors.response.use(
       localStorage.removeItem('token')
       localStorage.removeItem('userId')
       localStorage.removeItem('username')
+      localStorage.removeItem('tenantId')
+      localStorage.removeItem('tenantName')
       if (routerInstance) {
         routerInstance.push('/login')
       } else {

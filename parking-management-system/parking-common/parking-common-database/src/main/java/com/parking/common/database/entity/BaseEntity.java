@@ -16,6 +16,8 @@ public abstract class BaseEntity implements Serializable {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
+    private Long tenantId;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
