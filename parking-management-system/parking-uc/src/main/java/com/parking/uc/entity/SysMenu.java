@@ -1,9 +1,13 @@
 package com.parking.uc.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.parking.common.database.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -25,4 +29,7 @@ public class SysMenu extends BaseEntity {
     private String permission;
 
     private Integer sortOrder;
+
+    @TableField(exist = false)
+    private List<SysMenu> children = new ArrayList<>();
 }

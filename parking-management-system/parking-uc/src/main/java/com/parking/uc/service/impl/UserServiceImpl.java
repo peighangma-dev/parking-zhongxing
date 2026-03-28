@@ -6,23 +6,28 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.parking.common.core.BusinessException;
 import com.parking.common.core.ErrorCode;
 import com.parking.uc.entity.SysUser;
+import com.parking.uc.entity.SysUserRole;
 import com.parking.uc.mapper.SysUserMapper;
+import com.parking.uc.mapper.SysUserRoleMapper;
 import com.parking.uc.service.UserService;
 import com.parking.uc.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final SysUserMapper userMapper;
+    private final SysUserRoleMapper userRoleMapper;
     private final JwtUtils jwtUtils;
 
     @Override
@@ -123,6 +128,31 @@ public class UserServiceImpl implements UserService {
         update.setId(id);
         update.setPassword(hashPassword(newPassword));
         userMapper.updateById(update);
+        return true;
+    }
+
+    @Override
+    public List<Long> getRoleIds(Long userId) {
+        LambdaQueryWrapper<SysUserRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysUserRole::getUserId, userId);
+        return userRoleMapper.selectList(wrapper).stream()
+                .map(SysUserRole::getRoleId)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public boolean assignRoles(Long userId, List<Long> roleIds) {
+        LambdaQueryWrapper<SysUserRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysUserRole::getUserId, userId);
+        userRoleMapper.delete(wrapper);
+        
+        for (Long roleId : roleIds) {
+            SysUserRole userRole = new SysUserRole();
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            userRoleMapper.insert(userRole);
+        }
         return true;
     }
 

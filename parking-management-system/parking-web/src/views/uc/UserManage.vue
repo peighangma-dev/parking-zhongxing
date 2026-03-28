@@ -29,9 +29,10 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="280">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
+            <el-button type="warning" link @click="handleAssignRoles(row)">分配角色</el-button>
             <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -68,6 +69,22 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+    <el-dialog v-model="roleDialogVisible" title="分配角色" width="500px">
+      <el-form :model="roleForm" label-width="80px">
+        <el-form-item label="用户名">
+          <span>{{ currentUser?.username }}</span>
+        </el-form-item>
+        <el-form-item label="选择角色">
+          <el-checkbox-group v-model="roleForm.roleIds">
+            <el-checkbox v-for="role in allRoles" :key="role.id" :label="role.id">{{ role.roleName }}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="roleDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSaveRoles">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -89,7 +106,10 @@ const pagination = reactive({
 })
 
 const dialogVisible = ref(false)
+const roleDialogVisible = ref(false)
 const dialogTitle = ref('新增用户')
+const currentUser = ref<any>(null)
+const allRoles = ref<any[]>([])
 const form = reactive({
   id: null as number | null,
   username: '',
@@ -97,6 +117,9 @@ const form = reactive({
   nickname: '',
   phone: '',
   email: ''
+})
+const roleForm = reactive({
+  roleIds: [] as number[]
 })
 
 const loadData = async () => {
@@ -112,6 +135,15 @@ const loadData = async () => {
     pagination.total = res.total || 0
   } catch (error) {
     console.error('Failed to load data:', error)
+  }
+}
+
+const loadAllRoles = async () => {
+  try {
+    const res = await request.get('/uc/v1/roles/all')
+    allRoles.value = res || []
+  } catch (error) {
+    console.error('Failed to load roles:', error)
   }
 }
 
@@ -158,6 +190,27 @@ const handleDelete = async (row: any) => {
   }
 }
 
+const handleAssignRoles = async (row: any) => {
+  currentUser.value = row
+  roleDialogVisible.value = true
+  try {
+    const res = await request.get(`/uc/v1/users/${row.id}/roles`)
+    roleForm.roleIds = res || []
+  } catch (error) {
+    roleForm.roleIds = []
+  }
+}
+
+const handleSaveRoles = async () => {
+  try {
+    await request.put(`/uc/v1/users/${currentUser.value.id}/roles`, roleForm.roleIds)
+    ElMessage.success('角色分配成功')
+    roleDialogVisible.value = false
+  } catch (error) {
+    console.error('Failed to assign roles:', error)
+  }
+}
+
 const handleSubmit = async () => {
   try {
     if (form.id) {
@@ -176,6 +229,7 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   loadData()
+  loadAllRoles()
 })
 </script>
 

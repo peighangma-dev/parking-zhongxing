@@ -7,6 +7,7 @@ import com.parking.uc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -67,5 +68,15 @@ public class UserController {
             @RequestParam String oldPassword,
             @RequestParam String newPassword) {
         return Result.success(userService.updatePassword(id, oldPassword, newPassword));
+    }
+
+    @GetMapping("/users/{id}/roles")
+    public Result<List<Long>> getUserRoles(@PathVariable Long id) {
+        return Result.success(userService.getRoleIds(id));
+    }
+
+    @PutMapping("/users/{id}/roles")
+    public Result<Boolean> assignRoles(@PathVariable Long id, @RequestBody List<Long> roleIds) {
+        return Result.success(userService.assignRoles(id, roleIds));
     }
 }

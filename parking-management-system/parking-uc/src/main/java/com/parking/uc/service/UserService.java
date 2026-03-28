@@ -2,6 +2,7 @@ package com.parking.uc.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.parking.uc.entity.SysUser;
+import java.util.List;
 import java.util.Map;
 
 public interface UserService {
@@ -21,4 +22,8 @@ public interface UserService {
     boolean deleteUser(Long id);
 
     boolean updatePassword(Long id, String oldPassword, String newPassword);
+
+    List<Long> getRoleIds(Long userId);
+
+    boolean assignRoles(Long userId, List<Long> roleIds);
 }

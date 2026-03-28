@@ -66,6 +66,7 @@
             <span>系统管理</span>
           </template>
           <el-menu-item index="/uc/user">用户管理</el-menu-item>
+          <el-menu-item index="/uc/role">角色管理</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
@@ -107,6 +108,7 @@ const pageTitleMap: Record<string, string> = {
   '/report/daily': '收费报表',
   '/report/monthly': '收费月报',
   '/uc/user': '用户管理',
+  '/uc/role': '角色管理',
 }
 const pageTitle = computed(() => pageTitleMap[route.path] || '')
 
