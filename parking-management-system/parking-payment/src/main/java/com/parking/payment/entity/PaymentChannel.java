@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -17,6 +18,10 @@ public class PaymentChannel extends BaseEntity {
     private String channelName;
 
     private BigDecimal feeRate;
+
+    private Map<String, String> config;
+
+    private String description;
 
     private String status;
 
