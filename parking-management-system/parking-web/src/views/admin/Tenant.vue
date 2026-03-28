@@ -203,14 +203,20 @@ const rules = {
 const loadTenants = async () => {
   loading.value = true
   try {
-    const res: any = await request.get('/tenant/v1/page', {
-      current: pagination.current,
-      size: pagination.size,
-      tenantName: searchKeyword.value,
-      status: searchStatus.value
-    })
-    tenants.value = res.records
-    pagination.total = res.total
+    const res: any = await request.get('/tenant/v1/list')
+    let data = res || []
+    // 前端搜索过滤
+    if (searchKeyword.value) {
+      data = data.filter((t: Tenant) => t.tenantName?.includes(searchKeyword.value))
+    }
+    if (searchStatus.value) {
+      data = data.filter((t: Tenant) => t.status === searchStatus.value)
+    }
+    // 前端分页
+    pagination.total = data.length
+    const start = (pagination.current - 1) * pagination.size
+    const end = start + pagination.size
+    tenants.value = data.slice(start, end)
   } catch (error: any) {
     ElMessage.error(error.message || '加载失败')
   } finally {

@@ -1,6 +1,5 @@
 package com.parking.tenant.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -9,13 +8,15 @@ import com.parking.tenant.mapper.TenantMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
 
     public Tenant getByTenantCode(String tenantCode) {
-        if (!StringUtils.hasText(tenantCode)) {
+        if (tenantCode == null || tenantCode.isEmpty()) {
             return null;
         }
         LambdaQueryWrapper<Tenant> wrapper = new LambdaQueryWrapper<>();
@@ -47,17 +48,16 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         return false;
     }
 
-    public IPage<Tenant> page(Integer current, Integer size, String tenantName, String status) {
+    public IPage<Tenant> pageTenants(Integer current, Integer size, String tenantName, String status) {
+        int offset = (current - 1) * size;
+        
+        List<Tenant> records = this.baseMapper.selectPageWithConditions(offset, size, tenantName, status);
+        long total = this.baseMapper.selectFoundRows();
+        
         Page<Tenant> page = new Page<>(current, size);
-        LambdaQueryWrapper<Tenant> wrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.hasText(tenantName)) {
-            wrapper.like(Tenant::getTenantName, tenantName);
-        }
-        if (StringUtils.hasText(status)) {
-            wrapper.eq(Tenant::getStatus, status);
-        }
-        wrapper.orderByDesc(Tenant::getId);
-        return this.page(page, wrapper);
+        page.setRecords(records);
+        page.setTotal(total);
+        return page;
     }
 
     public Tenant getByIdTenant(Long id) {

@@ -1,17 +1,11 @@
 package com.parking.tenant.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.parking.tenant.dto.TenantLoginDTO;
-import com.parking.tenant.dto.TenantRegisterDTO;
-import com.parking.tenant.entity.Package;
 import com.parking.tenant.entity.Tenant;
-import com.parking.tenant.service.PackageService;
 import com.parking.tenant.service.TenantService;
 import com.parking.common.core.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,21 +17,40 @@ public class TenantController {
     @Autowired
     private TenantService tenantService;
 
-    @Autowired
-    private PackageService packageService;
-
-    @GetMapping("/packages")
-    public Result<List<Package>> getPackages() {
-        return Result.success(packageService.list());
-    }
-
     @GetMapping("/page")
-    public Result<IPage<Tenant>> page(
+    public Result<Map<String, Object>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String tenantName,
             @RequestParam(required = false) String status) {
-        return Result.success(tenantService.page(current, size, tenantName, status));
+        
+        List<Tenant> allTenants = tenantService.list();
+        
+        // 过滤
+        if (tenantName != null && !tenantName.isEmpty()) {
+            allTenants = allTenants.stream()
+                .filter(t -> t.getTenantName() != null && t.getTenantName().contains(tenantName))
+                .toList();
+        }
+        if (status != null && !status.isEmpty()) {
+            allTenants = allTenants.stream()
+                .filter(t -> status.equals(t.getStatus()))
+                .toList();
+        }
+        
+        int total = allTenants.size();
+        int fromIndex = (current - 1) * size;
+        int toIndex = Math.min(fromIndex + size, total);
+        List<Tenant> paged = fromIndex < total ? allTenants.subList(fromIndex, toIndex) : List.of();
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", paged);
+        result.put("total", total);
+        result.put("size", size);
+        result.put("current", current);
+        result.put("pages", (total + size - 1) / size);
+        
+        return Result.success(result);
     }
 
     @GetMapping("/list")
@@ -68,69 +81,7 @@ public class TenantController {
 
     @PutMapping("/status/{id}")
     public Result<Boolean> updateStatus(@PathVariable Long id, @RequestParam String status) {
-        Tenant tenant = new Tenant();
-        tenant.setId(id);
-        tenant.setStatus(status);
-        tenantService.update(id, tenant);
+        tenantService.updateTenantStatus(id, status);
         return Result.success(true);
-    }
-
-    @PutMapping("/expire/{id}")
-    public Result<Boolean> updateExpireTime(@PathVariable Long id, @RequestParam String expireTime) {
-        Tenant tenant = new Tenant();
-        tenant.setId(id);
-        tenant.setExpireTime(LocalDateTime.parse(expireTime));
-        tenantService.update(id, tenant);
-        return Result.success(true);
-    }
-
-    @PostMapping("/register")
-    public Result<Map<String, Object>> register(@RequestBody TenantRegisterDTO dto) {
-        Map<String, Object> result = new HashMap<>();
-        
-        Tenant existing = tenantService.getByCode(dto.getTenantCode());
-        if (existing != null) {
-            return Result.error("租户编码已存在");
-        }
-
-        Tenant tenant = new Tenant();
-        tenant.setTenantCode(dto.getTenantCode());
-        tenant.setTenantName(dto.getTenantName());
-        tenant.setContactName(dto.getContactName());
-        tenant.setContactPhone(dto.getContactPhone());
-        tenant.setContactEmail(dto.getContactEmail());
-        tenant.setPackageId(dto.getPackageId());
-        tenant.setStatus("active");
-        tenant.setMaxUsers(10);
-        tenant.setMaxSpaces(100);
-
-        Tenant created = tenantService.create(tenant);
-        result.put("tenantId", created.getId());
-        result.put("tenantCode", created.getTenantCode());
-        return Result.success(result);
-    }
-
-    @PostMapping("/login")
-    public Result<Map<String, Object>> login(@RequestBody TenantLoginDTO dto) {
-        Tenant tenant = tenantService.getByCode(dto.getTenantCode());
-        if (tenant == null) {
-            return Result.error("租户不存在");
-        }
-
-        if (!"active".equals(tenant.getStatus())) {
-            return Result.error("租户已被禁用");
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("tenantId", tenant.getId());
-        result.put("tenantCode", tenant.getTenantCode());
-        result.put("tenantName", tenant.getTenantName());
-        result.put("packageId", tenant.getPackageId());
-        return Result.success(result);
-    }
-
-    @GetMapping("/info/{tenantCode}")
-    public Result<Tenant> getTenantInfo(@PathVariable String tenantCode) {
-        return Result.success(tenantService.getByCode(tenantCode));
     }
 }
