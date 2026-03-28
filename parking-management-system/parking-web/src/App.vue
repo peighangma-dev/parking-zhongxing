@@ -6,7 +6,13 @@
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+/* System font stack - no external dependencies */
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400 700;
+  src: local('Orbitron'), local('Rajdhani');
+}
 
 * {
   margin: 0;
@@ -17,7 +23,7 @@
 html, body, #app {
   width: 100%;
   height: 100%;
-  font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+  font-family: 'Rajdhani', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 /* Cyberpunk Theme Variables */

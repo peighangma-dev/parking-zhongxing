@@ -31,5 +31,17 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    target: 'es2015',
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'element-plus': ['element-plus'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 800
   }
 })
