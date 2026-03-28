@@ -1,23 +1,18 @@
 package com.parking.common.core.tenant;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.parking.common.core.context.TenantContext;
-import com.parking.common.database.entity.BaseEntity;
-import com.parking.common.redis.utils.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 public class TenantResolver {
     
     private static final String TENANT_CACHE_KEY = "tenant:code:";
-    private static final long CACHE_EXPIRE = 10;
     
     @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;

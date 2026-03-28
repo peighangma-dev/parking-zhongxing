@@ -205,10 +205,11 @@
                 <version>${spring-cloud.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-registry-prometheus</artifactId>
-            </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>1.11.5</version>
+        </dependency>
         </dependencies>
     </dependencyManagement>
 
