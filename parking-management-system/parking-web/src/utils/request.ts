@@ -1,17 +1,10 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
 
 const request = axios.create({
   baseURL: '/api',
   timeout: 30000
 })
-
-let routerInstance: any = null
-
-export const setRouter = (router: any) => {
-  routerInstance = router
-}
 
 request.interceptors.request.use(
   (config) => {
@@ -33,24 +26,42 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => {
     const res = response.data
-    if (res.code !== 0) {
+    if (res.code === undefined) {
+      return res
+    }
+    if (res.code !== 0 && res.code !== 200) {
       ElMessage.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message || '请求失败'))
     }
     return res.data
   },
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('userId')
-      localStorage.removeItem('username')
-      localStorage.removeItem('tenantId')
-      localStorage.removeItem('tenantName')
-      if (routerInstance) {
-        routerInstance.push('/login')
-      } else {
-        window.location.href = '/login'
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          localStorage.removeItem('token')
+          localStorage.removeItem('userId')
+          localStorage.removeItem('username')
+          localStorage.removeItem('nickname')
+          localStorage.removeItem('tenantId')
+          localStorage.removeItem('tenantName')
+          ElMessage.error('登录已过期，请重新登录')
+          window.location.href = '/login'
+          break
+        case 403:
+          ElMessage.error('没有权限访问该资源')
+          break
+        case 404:
+          ElMessage.error('请求的资源不存在')
+          break
+        case 500:
+          ElMessage.error('服务器内部错误')
+          break
+        default:
+          ElMessage.error(error.response.data?.message || '请求失败')
       }
+    } else if (error.code === 'ECONNABORTED') {
+      ElMessage.error('请求超时，请稍后重试')
     } else {
       ElMessage.error(error.message || '网络错误')
     }

@@ -12,11 +12,12 @@ import com.parking.uc.mapper.SysUserRoleMapper;
 import com.parking.uc.service.UserService;
 import com.parking.uc.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final SysUserMapper userMapper;
     private final SysUserRoleMapper userRoleMapper;
     private final JwtUtils jwtUtils;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public Map<String, Object> login(String username, String password) {
@@ -36,8 +38,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND.getCode(), "用户名或密码错误");
         }
-        String hashedPassword = hashPassword(password);
-        if (!hashedPassword.equals(user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "用户名或密码错误");
         }
         if (!"normal".equals(user.getStatus())) {
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
         if (getByUsername(user.getUsername()) != null) {
             throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "用户名已存在");
         }
-        user.setPassword(hashPassword(user.getPassword()));
+        user.setPassword(encodePassword(user.getPassword()));
         user.setStatus("normal");
         userMapper.insert(user);
         user.setPassword(null);
@@ -85,10 +86,10 @@ public class UserServiceImpl implements UserService {
     public IPage<SysUser> page(Integer current, Integer size, String username, String nickname) {
         Page<SysUser> page = new Page<>(current, size);
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        if (username != null && !username.isEmpty()) {
+        if (StringUtils.hasText(username)) {
             wrapper.like(SysUser::getUsername, username);
         }
-        if (nickname != null && !nickname.isEmpty()) {
+        if (StringUtils.hasText(nickname)) {
             wrapper.like(SysUser::getNickname, nickname);
         }
         wrapper.orderByDesc(SysUser::getId);
@@ -120,13 +121,18 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
-        String hashedOld = hashPassword(oldPassword);
-        if (!hashedOld.equals(user.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "原密码错误");
+        }
+        if (oldPassword.equals(newPassword)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "新密码不能与原密码相同");
+        }
+        if (!isPasswordStrong(newPassword)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "密码强度不足，至少8位，包含字母和数字");
         }
         SysUser update = new SysUser();
         update.setId(id);
-        update.setPassword(hashPassword(newPassword));
+        update.setPassword(encodePassword(newPassword));
         userMapper.updateById(update);
         return true;
     }
@@ -156,7 +162,20 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    private String hashPassword(String password) {
-        return DigestUtils.md5DigestAsHex(("parking" + password + "salt").getBytes(StandardCharsets.UTF_8));
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    private boolean isPasswordStrong(String password) {
+        if (password == null || password.length() < 8) {
+            return false;
+        }
+        boolean hasLetter = false;
+        boolean hasDigit = false;
+        for (char c : password.toCharArray()) {
+            if (Character.isLetter(c)) hasLetter = true;
+            if (Character.isDigit(c)) hasDigit = true;
+        }
+        return hasLetter && hasDigit;
     }
 }

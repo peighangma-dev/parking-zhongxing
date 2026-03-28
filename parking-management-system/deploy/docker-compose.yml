@@ -67,6 +67,37 @@ services:
     networks:
       - parking-network
 
+  sentinel-dashboard:
+    image: bladex/sentinel-dashboard:latest
+    container_name: parking-sentinel
+    restart: always
+    environment:
+      JAVA_OPTS: "-Dserver.port=8858"
+    ports:
+      - "8858:8858"
+    networks:
+      - parking-network
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: parking-zipkin
+    restart: always
+    ports:
+      - "9411:9411"
+    networks:
+      - parking-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: parking-prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - parking-network
+
 volumes:
   mysql_data:
     driver: local

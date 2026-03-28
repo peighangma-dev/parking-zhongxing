@@ -6,13 +6,14 @@ spring:
     name: parking-payment
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
-    username: parking
-    password: parking123
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: ${DB_USERNAME:parking}
+    password: ${DB_PASSWORD:parking123}
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
@@ -24,6 +25,27 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+
+payment:
+  callback:
+    secret: ${PAYMENT_CALLBACK_SECRET:payment-callback-secret-key}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springcloud:
+  sleuth:
+    zipkin:
+      base-url: ${ZIPKIN_BASE_URL:http://localhost:9411}
 
 logging:
   level:

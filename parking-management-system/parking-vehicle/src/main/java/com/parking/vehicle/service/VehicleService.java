@@ -25,4 +25,6 @@ public interface VehicleService {
     boolean disable(Long id);
 
     boolean isBlacklisted(Long vehicleId);
+
+    void validateVehicleAccess(Long vehicleId);
 }

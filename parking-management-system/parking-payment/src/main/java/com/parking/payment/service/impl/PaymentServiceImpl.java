@@ -13,6 +13,7 @@ import com.parking.payment.mapper.PaymentMapper;
 import com.parking.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -30,6 +31,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentMapper paymentMapper;
     private final Map<String, PaymentChannelAdapter> adapters = new ConcurrentHashMap<>();
+
+    @Value("${payment.callback.secret:payment-callback-secret-key}")
+    private String callbackSecret;
 
     @Override
     public IPage<Payment> page(Integer current, Integer size, String orderNo, String plateNumber, String paymentStatus) {
@@ -77,6 +81,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment createOrder(String plateNumber, Long passRecordId, BigDecimal amountDue) {
+        if (amountDue == null || amountDue.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "金额不能为负数");
+        }
         Payment payment = new Payment();
         payment.setOrderNo(generateOrderNo());
         payment.setPlateNumber(plateNumber);
@@ -120,6 +127,12 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public boolean reverse(String orderNo, String reason) {
         Payment payment = getByOrderNo(orderNo);
+        if (!"paid".equals(payment.getPaymentStatus())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "只能冲正已支付的订单");
+        }
+        if ("refunded".equals(payment.getPaymentStatus())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "已退款的订单无法冲正");
+        }
         payment.setPaymentStatus("reversed");
         paymentMapper.updateById(payment);
         log.info("冲正订单, orderNo={}, reason={}", orderNo, reason);
@@ -132,10 +145,40 @@ public class PaymentServiceImpl implements PaymentService {
         if (!"paid".equals(payment.getPaymentStatus())) {
             throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "只能退款已支付的订单");
         }
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "退款金额必须大于0");
+        }
+        if (amount.compareTo(payment.getAmountPaid()) > 0) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "退款金额不能超过已支付金额");
+        }
         payment.setPaymentStatus("refunded");
+        payment.setAmountPaid(payment.getAmountPaid().subtract(amount));
         paymentMapper.updateById(payment);
         log.info("退款订单, orderNo={}, amount={}", orderNo, amount);
         return true;
+    }
+
+    public boolean validateCallbackSignature(String orderNo, String transactionId, String signature) {
+        if (!StringUtils.hasText(signature)) {
+            return false;
+        }
+        String expectedSignature = generateCallbackSignature(orderNo, transactionId);
+        return expectedSignature.equals(signature);
+    }
+
+    private String generateCallbackSignature(String orderNo, String transactionId) {
+        String content = orderNo + ":" + transactionId + ":" + callbackSecret;
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String generateOrderNo() {

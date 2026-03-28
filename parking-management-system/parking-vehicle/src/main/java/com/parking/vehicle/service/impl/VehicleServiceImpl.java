@@ -89,6 +89,17 @@ public class VehicleServiceImpl implements VehicleService {
         if (existing == null) {
             throw new BusinessException(ErrorCode.VEHICLE_NOT_FOUND);
         }
+        
+        if (StringUtils.hasText(vehicle.getPlateNumber()) 
+                && !vehicle.getPlateNumber().equals(existing.getPlateNumber())) {
+            LambdaQueryWrapper<Vehicle> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Vehicle::getPlateNumber, vehicle.getPlateNumber());
+            wrapper.ne(Vehicle::getId, vehicle.getId());
+            if (vehicleMapper.selectCount(wrapper) > 0) {
+                throw new BusinessException(ErrorCode.INVALID_PARAMETER.getCode(), "车牌号已被其他车辆使用");
+            }
+        }
+        
         vehicleMapper.updateById(vehicle);
         return vehicle;
     }
@@ -117,5 +128,16 @@ public class VehicleServiceImpl implements VehicleService {
         LambdaQueryWrapper<Blacklist> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Blacklist::getVehicleId, vehicleId);
         return blacklistMapper.selectCount(wrapper) > 0;
+    }
+
+    @Override
+    public void validateVehicleAccess(Long vehicleId) {
+        Vehicle vehicle = getById(vehicleId);
+        if ("disabled".equals(vehicle.getStatus())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN.getCode(), "车辆已被禁用");
+        }
+        if (isBlacklisted(vehicleId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN.getCode(), "车辆在黑名单中，禁止入场");
+        }
     }
 }

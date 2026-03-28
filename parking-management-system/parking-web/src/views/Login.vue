@@ -19,14 +19,14 @@
         <p class="subtitle">PARKING MANAGEMENT SYSTEM</p>
       </div>
 
-      <el-form :model="form" @submit.prevent="handleLogin" class="login-form">
+      <el-form :model="form" :rules="rules" @submit.prevent="handleLogin" class="login-form" ref="formRef">
         <div class="form-title">
           <span class="line"></span>
           <span class="text">系统登录</span>
           <span class="line"></span>
         </div>
         
-        <el-form-item>
+        <el-form-item prop="username">
           <div class="input-wrapper">
             <el-icon class="input-icon"><User /></el-icon>
             <el-input 
@@ -37,7 +37,7 @@
           </div>
         </el-form-item>
         
-        <el-form-item>
+        <el-form-item prop="password">
           <div class="input-wrapper">
             <el-icon class="input-icon"><Lock /></el-icon>
             <el-input 
@@ -83,28 +83,49 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import type { FormInstance, FormRules } from 'element-plus'
 import request from '@/utils/request'
 
 const router = useRouter()
 const loading = ref(false)
+const formRef = ref<FormInstance>()
+
 const form = reactive({
-  username: 'admin',
-  password: 'admin'
+  username: '',
+  password: ''
 })
 
+const rules: FormRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 32, message: '用户名长度为3-32个字符', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, max: 32, message: '密码长度为6-32个字符', trigger: 'blur' }
+  ]
+}
+
 const handleLogin = async () => {
-  loading.value = true
-  try {
-    const res = await request.get('/uc/v1/login', {
-      params: form
-    })
-    localStorage.setItem('token', res.token)
-    localStorage.setItem('userId', res.userId)
-    localStorage.setItem('username', res.username)
-    router.push('/')
-  } finally {
-    loading.value = false
-  }
+  if (!formRef.value) return
+  
+  await formRef.value.validate(async (valid) => {
+    if (!valid) return
+    
+    loading.value = true
+    try {
+      const res = await request.post('/uc/v1/login', form)
+      localStorage.setItem('token', res.token)
+      localStorage.setItem('userId', res.userId)
+      localStorage.setItem('username', res.username)
+      localStorage.setItem('nickname', res.nickname)
+      router.push('/')
+    } catch (error: any) {
+      ElMessage.error(error.message || '登录失败')
+    } finally {
+      loading.value = false
+    }
+  })
 }
 </script>
 

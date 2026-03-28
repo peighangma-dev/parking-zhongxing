@@ -6,13 +6,14 @@ spring:
     name: parking-report
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
-    username: parking
-    password: parking123
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/parking_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: ${DB_USERNAME:parking}
+    password: ${DB_PASSWORD:parking123}
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

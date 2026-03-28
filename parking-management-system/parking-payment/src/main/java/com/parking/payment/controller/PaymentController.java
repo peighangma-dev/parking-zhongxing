@@ -1,9 +1,11 @@
 package com.parking.payment.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.parking.common.core.BusinessException;
 import com.parking.common.core.Result;
 import com.parking.payment.entity.Payment;
 import com.parking.payment.service.PaymentService;
+import com.parking.payment.service.impl.PaymentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +16,12 @@ import java.math.BigDecimal;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final PaymentServiceImpl paymentServiceImpl;
 
     @Autowired
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, PaymentServiceImpl paymentServiceImpl) {
         this.paymentService = paymentService;
+        this.paymentServiceImpl = paymentServiceImpl;
     }
 
     @GetMapping("/page")
@@ -47,7 +51,11 @@ public class PaymentController {
     public Result<Payment> callback(
             @PathVariable String channel,
             @RequestParam String orderNo,
-            @RequestParam String transactionId) {
+            @RequestParam String transactionId,
+            @RequestParam(required = false) String signature) {
+        if (!paymentServiceImpl.validateCallbackSignature(orderNo, transactionId, signature)) {
+            throw new BusinessException(403, "签名校验失败");
+        }
         Payment payment = paymentService.pay(orderNo, null, transactionId);
         return Result.success(payment);
     }

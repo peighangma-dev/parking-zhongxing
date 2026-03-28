@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.parking.common.core.Result;
 import com.parking.uc.entity.SysUser;
 import com.parking.uc.service.UserService;
+import com.parking.uc.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,22 +17,51 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtUtils jwtUtils) {
         this.userService = userService;
+        this.jwtUtils = jwtUtils;
     }
 
-    @GetMapping("/login")
-    public Result<Map<String, Object>> login(
-            @RequestParam String username,
-            @RequestParam String password) {
+    @PostMapping("/login")
+    public Result<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
+        String username = loginRequest.get("username");
+        String password = loginRequest.get("password");
+        if (username == null || username.isEmpty()) {
+            return Result.error("用户名不能为空");
+        }
+        if (password == null || password.isEmpty()) {
+            return Result.error("密码不能为空");
+        }
         return Result.success(userService.login(username, password));
     }
 
     @GetMapping("/current")
-    public Result<SysUser> getCurrentUser(@RequestHeader("Authorization") String token) {
-        return Result.success(null);
+    public Result<Map<String, Object>> getCurrentUser(@RequestHeader("Authorization") String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            return Result.error("未授权");
+        }
+        token = token.substring(7);
+        if (!jwtUtils.validateToken(token)) {
+            return Result.error("token无效或已过期");
+        }
+        Long userId = jwtUtils.getUserIdFromToken(token);
+        if (userId == null) {
+            return Result.error("无法解析用户信息");
+        }
+        SysUser user = userService.getById(userId);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+        List<Long> roleIds = userService.getRoleIds(userId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("userId", user.getId());
+        result.put("username", user.getUsername());
+        result.put("nickname", user.getNickname());
+        result.put("roleIds", roleIds);
+        return Result.success(result);
     }
 
     @GetMapping("/users/page")
