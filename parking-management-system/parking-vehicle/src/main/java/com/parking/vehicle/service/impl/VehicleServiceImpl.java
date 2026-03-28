@@ -24,9 +24,12 @@ public class VehicleServiceImpl implements VehicleService {
     private final BlacklistMapper blacklistMapper;
 
     @Override
-    public IPage<Vehicle> page(Integer current, Integer size, String plateNumber, String vehicleTypeCat, String status) {
+    public IPage<Vehicle> page(Integer current, Integer size, Long tenantId, String plateNumber, String vehicleTypeCat, String status) {
         Page<Vehicle> page = new Page<>(current, size);
         LambdaQueryWrapper<Vehicle> wrapper = new LambdaQueryWrapper<>();
+        if (tenantId != null && tenantId > 0) {
+            wrapper.eq(Vehicle::getTenantId, tenantId);
+        }
         if (StringUtils.hasText(plateNumber)) {
             wrapper.like(Vehicle::getPlateNumber, plateNumber);
         }
@@ -41,8 +44,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<Vehicle> list(String plateNumber, String vehicleTypeCat) {
+    public List<Vehicle> list(Long tenantId, String plateNumber, String vehicleTypeCat) {
         LambdaQueryWrapper<Vehicle> wrapper = new LambdaQueryWrapper<>();
+        if (tenantId != null && tenantId > 0) {
+            wrapper.eq(Vehicle::getTenantId, tenantId);
+        }
         if (StringUtils.hasText(plateNumber)) {
             wrapper.like(Vehicle::getPlateNumber, plateNumber);
         }

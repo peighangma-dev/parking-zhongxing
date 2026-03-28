@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface BarrierService {
 
-    IPage<Barrier> page(Integer current, Integer size, String code, String name, String status);
+    IPage<Barrier> page(Integer current, Integer size, Long tenantId, String code, String name, String status);
 
-    List<Barrier> list(String code, String name, String status);
+    List<Barrier> list(Long tenantId, String code, String name, String status);
 
     Barrier getById(Long id);
 

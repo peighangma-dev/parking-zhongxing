@@ -10,6 +10,8 @@ import lombok.EqualsAndHashCode;
 @TableName("barrier")
 public class Barrier extends BaseEntity {
 
+    private Long tenantId;
+
     private String code;
 
     private String name;

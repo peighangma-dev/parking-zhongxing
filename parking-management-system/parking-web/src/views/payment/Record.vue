@@ -28,6 +28,7 @@
         </el-form-item>
       </el-form>
       <el-table :data="tableData" stripe style="width: 100%">
+        <el-table-column prop="tenantId" label="租户ID" width="100" v-if="isSuperAdmin" />
         <el-table-column prop="orderNo" label="订单号" width="180" />
         <el-table-column prop="plateNumber" label="车牌号" />
         <el-table-column prop="channelName" label="支付渠道" />
@@ -63,9 +64,11 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
+
+const isSuperAdmin = computed(() => localStorage.getItem('isSuperAdmin') === 'true')
 
 const statusMap: Record<string, string> = {
   pending: '待支付',

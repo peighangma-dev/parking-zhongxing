@@ -119,6 +119,8 @@ const handleLogin = async () => {
       localStorage.setItem('userId', res.userId)
       localStorage.setItem('username', res.username)
       localStorage.setItem('nickname', res.nickname)
+      localStorage.setItem('tenantId', res.tenantId || '')
+      localStorage.setItem('isSuperAdmin', res.isSuperAdmin ? 'true' : 'false')
       router.push('/')
     } catch (error: any) {
       ElMessage.error(error.message || '登录失败')

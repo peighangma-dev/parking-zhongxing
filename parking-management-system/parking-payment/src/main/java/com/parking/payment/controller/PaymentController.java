@@ -3,6 +3,7 @@ package com.parking.payment.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.parking.common.core.BusinessException;
 import com.parking.common.core.Result;
+import com.parking.common.core.context.TenantContext;
 import com.parking.payment.entity.Payment;
 import com.parking.payment.service.PaymentService;
 import com.parking.payment.service.impl.PaymentServiceImpl;
@@ -28,10 +29,16 @@ public class PaymentController {
     public Result<IPage<Payment>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) Long tenantId,
             @RequestParam(required = false) String orderNo,
             @RequestParam(required = false) String plateNumber,
             @RequestParam(required = false) String paymentStatus) {
-        return Result.success(paymentService.page(current, size, orderNo, plateNumber, paymentStatus));
+        if (tenantId == null && TenantContext.canViewAllTenants()) {
+            tenantId = null;
+        } else if (tenantId == null) {
+            tenantId = TenantContext.getTenantId();
+        }
+        return Result.success(paymentService.page(current, size, tenantId, orderNo, plateNumber, paymentStatus));
     }
 
     @GetMapping("/order/{orderNo}")

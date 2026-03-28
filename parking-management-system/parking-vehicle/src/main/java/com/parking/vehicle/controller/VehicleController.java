@@ -2,6 +2,7 @@ package com.parking.vehicle.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.parking.common.core.Result;
+import com.parking.common.core.context.TenantContext;
 import com.parking.vehicle.entity.Vehicle;
 import com.parking.vehicle.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,16 @@ public class VehicleController {
     public Result<IPage<Vehicle>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) Long tenantId,
             @RequestParam(required = false) String plateNumber,
             @RequestParam(required = false) String vehicleTypeCat,
             @RequestParam(required = false) String status) {
-        return Result.success(vehicleService.page(current, size, plateNumber, vehicleTypeCat, status));
+        if (tenantId == null && TenantContext.canViewAllTenants()) {
+            tenantId = null;
+        } else if (tenantId == null) {
+            tenantId = TenantContext.getTenantId();
+        }
+        return Result.success(vehicleService.page(current, size, tenantId, plateNumber, vehicleTypeCat, status));
     }
 
     @GetMapping("/{id}")
@@ -40,6 +47,9 @@ public class VehicleController {
 
     @PostMapping
     public Result<Vehicle> save(@RequestBody Vehicle vehicle) {
+        if (vehicle.getTenantId() == null) {
+            vehicle.setTenantId(TenantContext.getTenantId());
+        }
         return Result.success(vehicleService.save(vehicle));
     }
 

@@ -25,6 +25,7 @@
         </el-form-item>
       </el-form>
       <el-table :data="tableData" stripe style="width: 100%">
+        <el-table-column prop="tenantId" label="租户ID" width="100" v-if="isSuperAdmin" />
         <el-table-column prop="plateNumber" label="车牌号" />
         <el-table-column prop="plateColor" label="车牌颜色" />
         <el-table-column prop="vehicleBrand" label="车辆品牌" />
@@ -102,9 +103,11 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
+
+const isSuperAdmin = computed(() => localStorage.getItem('isSuperAdmin') === 'true')
 
 const queryForm = reactive({
   plateNumber: '',

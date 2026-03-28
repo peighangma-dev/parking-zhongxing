@@ -27,6 +27,7 @@
         </el-form-item>
       </el-form>
       <el-table :data="tableData" stripe style="width: 100%">
+        <el-table-column prop="tenantId" label="租户ID" width="100" v-if="isSuperAdmin" />
         <el-table-column prop="code" label="设备编码" />
         <el-table-column prop="name" label="设备名称" />
         <el-table-column prop="location" label="安装位置" />
@@ -92,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -103,6 +104,8 @@ const statusMap: Record<string, string> = {
   normal: '正常',
   disabled: '停用'
 }
+
+const isSuperAdmin = computed(() => localStorage.getItem('isSuperAdmin') === 'true')
 
 const queryForm = reactive({
   code: '',

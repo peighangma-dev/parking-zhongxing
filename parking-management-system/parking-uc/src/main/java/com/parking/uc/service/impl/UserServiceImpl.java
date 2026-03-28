@@ -7,8 +7,10 @@ import com.parking.common.core.BusinessException;
 import com.parking.common.core.ErrorCode;
 import com.parking.uc.entity.SysUser;
 import com.parking.uc.entity.SysUserRole;
+import com.parking.uc.entity.SysRole;
 import com.parking.uc.mapper.SysUserMapper;
 import com.parking.uc.mapper.SysUserRoleMapper;
+import com.parking.uc.mapper.SysRoleMapper;
 import com.parking.uc.service.UserService;
 import com.parking.uc.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +31,11 @@ public class UserServiceImpl implements UserService {
 
     private final SysUserMapper userMapper;
     private final SysUserRoleMapper userRoleMapper;
+    private final SysRoleMapper roleMapper;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private static final String SUPER_ADMIN_ROLE_CODE = "SUPER_ADMIN";
 
     @Override
     public Map<String, Object> login(String username, String password) {
@@ -45,12 +50,30 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.FORBIDDEN.getCode(), "用户已被禁用");
         }
         String token = jwtUtils.generateToken(user.getId(), user.getUsername());
+        
+        List<SysRole> roles = getUserRoles(user.getId());
+        boolean isSuperAdmin = roles.stream().anyMatch(r -> SUPER_ADMIN_ROLE_CODE.equals(r.getRoleCode()));
+        
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
         result.put("userId", user.getId());
         result.put("username", user.getUsername());
         result.put("nickname", user.getNickname());
+        result.put("tenantId", user.getTenantId());
+        result.put("isSuperAdmin", isSuperAdmin);
+        result.put("roles", roles);
         return result;
+    }
+    
+    @Override
+    public List<SysRole> getUserRoles(Long userId) {
+        List<Long> roleIds = getRoleIds(userId);
+        if (roleIds == null || roleIds.isEmpty()) {
+            return List.of();
+        }
+        LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(SysRole::getId, roleIds);
+        return roleMapper.selectList(wrapper);
     }
 
     @Override

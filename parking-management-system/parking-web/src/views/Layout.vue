@@ -128,9 +128,27 @@
           </div>
         </div>
         <div class="header-right">
+          <div v-if="isSuperAdmin" class="tenant-selector">
+            <el-select
+              v-model="selectedTenantId"
+              placeholder="选择租户"
+              size="default"
+              style="width: 180px"
+              @change="handleTenantChange"
+              filterable
+            >
+              <el-option label="全部租户" :value="0" />
+              <el-option
+                v-for="tenant in tenants"
+                :key="tenant.id"
+                :label="tenant.tenantName"
+                :value="tenant.id"
+              />
+            </el-select>
+          </div>
           <div class="tenant-info">
             <span class="tenant-label">租户:</span>
-            <span class="tenant-name">{{ tenantName }}</span>
+            <span class="tenant-name">{{ displayTenantName }}</span>
           </div>
           <div class="user-info">
             <div class="user-avatar">
@@ -159,18 +177,54 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useFeaturePermission, FEATURE_CODES } from '@/utils/featurePermission'
+import request from '@/utils/request'
 
 const router = useRouter()
 const route = useRoute()
 const username = computed(() => localStorage.getItem('username') || 'Admin')
 const tenantId = computed(() => localStorage.getItem('tenantId') || '1')
-const tenantName = computed(() => localStorage.getItem('tenantName') || '演示租户')
+const isSuperAdmin = computed(() => localStorage.getItem('isSuperAdmin') === 'true')
+const tenants = ref<any[]>([])
+const selectedTenantId = ref<number>(0)
+
+const displayTenantName = computed(() => {
+  if (isSuperAdmin.value && selectedTenantId.value !== 0) {
+    const tenant = tenants.value.find(t => t.id === selectedTenantId.value)
+    return tenant ? tenant.tenantName : '全部租户'
+  }
+  return localStorage.getItem('tenantName') || '演示租户'
+})
+
 const { loadFeatures, hasFeature } = useFeaturePermission()
+
+const loadTenants = async () => {
+  if (!isSuperAdmin.value) return
+  try {
+    const res: any = await request.get('/tenant/v1/list')
+    tenants.value = res || []
+  } catch (error) {
+    console.error('Failed to load tenants:', error)
+  }
+}
+
+const handleTenantChange = (val: number) => {
+  if (val === 0) {
+    localStorage.removeItem('selectedTenantId')
+  } else {
+    localStorage.setItem('selectedTenantId', String(val))
+  }
+}
 
 onMounted(async () => {
   const tid = Number(tenantId.value)
   if (tid) {
     await loadFeatures(tid)
+  }
+  await loadTenants()
+  
+  const savedTenantId = localStorage.getItem('selectedTenantId')
+  if (savedTenantId) {
+    selectedTenantId.value = Number(savedTenantId)
   }
 })
 
@@ -501,6 +555,12 @@ const handleLogout = () => {
   background: rgba(255, 0, 255, 0.1);
   border: 1px solid rgba(255, 0, 255, 0.3);
   border-radius: 8px;
+}
+
+.tenant-selector :deep(.el-input__wrapper) {
+  background: rgba(0, 255, 255, 0.1) !important;
+  border: 1px solid var(--cyber-cyan) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
 }
 
 .tenant-label {

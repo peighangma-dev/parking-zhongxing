@@ -16,6 +16,7 @@ public class TenantFilter implements GlobalFilter, Ordered {
 
     private static final String TENANT_HEADER = "X-Tenant-Id";
     private static final String TENANT_CODE_HEADER = "X-Tenant-Code";
+    private static final String SUPER_ADMIN_HEADER = "X-Super-Admin";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -23,27 +24,32 @@ public class TenantFilter implements GlobalFilter, Ordered {
         
         String tenantId = request.getHeaders().getFirst(TENANT_HEADER);
         String tenantCode = request.getHeaders().getFirst(TENANT_CODE_HEADER);
+        String isSuperAdmin = request.getHeaders().getFirst(SUPER_ADMIN_HEADER);
         
         if (tenantId == null) {
             tenantId = request.getQueryParams().getFirst("tenant_id");
         }
         
-        if (tenantId != null && !tenantId.isEmpty()) {
-            try {
-                TenantContext.setTenantId(Long.parseLong(tenantId));
-                if (tenantCode != null) {
-                    TenantContext.setTenantCode(tenantCode);
+        if ("true".equals(isSuperAdmin)) {
+            TenantContext.setSuperAdmin(true);
+        } else {
+            if (tenantId != null && !tenantId.isEmpty()) {
+                try {
+                    TenantContext.setTenantId(Long.parseLong(tenantId));
+                    if (tenantCode != null) {
+                        TenantContext.setTenantCode(tenantCode);
+                    }
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid tenant id: {}", tenantId);
                 }
-            } catch (NumberFormatException e) {
-                log.warn("Invalid tenant id: {}", tenantId);
             }
-        }
-        
-        String host = request.getHeaders().getFirst("Host");
-        if (host != null && tenantCode == null) {
-            String parsedCode = parseSubdomain(host);
-            if (parsedCode != null) {
-                TenantContext.setTenantCode(parsedCode);
+            
+            String host = request.getHeaders().getFirst("Host");
+            if (host != null && tenantCode == null) {
+                String parsedCode = parseSubdomain(host);
+                if (parsedCode != null) {
+                    TenantContext.setTenantCode(parsedCode);
+                }
             }
         }
 

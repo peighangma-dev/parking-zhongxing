@@ -36,9 +36,12 @@ public class PaymentServiceImpl implements PaymentService {
     private String callbackSecret;
 
     @Override
-    public IPage<Payment> page(Integer current, Integer size, String orderNo, String plateNumber, String paymentStatus) {
+    public IPage<Payment> page(Integer current, Integer size, Long tenantId, String orderNo, String plateNumber, String paymentStatus) {
         Page<Payment> page = new Page<>(current, size);
         LambdaQueryWrapper<Payment> wrapper = new LambdaQueryWrapper<>();
+        if (tenantId != null && tenantId > 0) {
+            wrapper.eq(Payment::getTenantId, tenantId);
+        }
         if (StringUtils.hasText(orderNo)) {
             wrapper.eq(Payment::getOrderNo, orderNo);
         }

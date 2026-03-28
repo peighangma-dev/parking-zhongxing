@@ -25,5 +25,7 @@ public interface UserService {
 
     List<Long> getRoleIds(Long userId);
 
+    List<SysRole> getUserRoles(Long userId);
+
     boolean assignRoles(Long userId, List<Long> roleIds);
 }

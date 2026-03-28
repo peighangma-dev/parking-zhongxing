@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface VehicleService {
 
-    IPage<Vehicle> page(Integer current, Integer size, String plateNumber, String vehicleTypeCat, String status);
+    IPage<Vehicle> page(Integer current, Integer size, Long tenantId, String plateNumber, String vehicleTypeCat, String status);
 
-    List<Vehicle> list(String plateNumber, String vehicleTypeCat);
+    List<Vehicle> list(Long tenantId, String plateNumber, String vehicleTypeCat);
 
     Vehicle getById(Long id);
 

@@ -10,6 +10,8 @@ import lombok.EqualsAndHashCode;
 @TableName("vehicle")
 public class Vehicle extends BaseEntity {
 
+    private Long tenantId;
+
     private String plateNumber;
 
     private String plateColor;

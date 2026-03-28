@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public interface PaymentService {
 
-    IPage<Payment> page(Integer current, Integer size, String orderNo, String plateNumber, String paymentStatus);
+    IPage<Payment> page(Integer current, Integer size, Long tenantId, String orderNo, String plateNumber, String paymentStatus);
 
     Payment getById(Long id);
 

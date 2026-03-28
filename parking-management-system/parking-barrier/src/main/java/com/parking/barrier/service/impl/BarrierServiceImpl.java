@@ -21,9 +21,12 @@ public class BarrierServiceImpl implements BarrierService {
     private final BarrierMapper barrierMapper;
 
     @Override
-    public IPage<Barrier> page(Integer current, Integer size, String code, String name, String status) {
+    public IPage<Barrier> page(Integer current, Integer size, Long tenantId, String code, String name, String status) {
         Page<Barrier> page = new Page<>(current, size);
         LambdaQueryWrapper<Barrier> wrapper = new LambdaQueryWrapper<>();
+        if (tenantId != null && tenantId > 0) {
+            wrapper.eq(Barrier::getTenantId, tenantId);
+        }
         if (StringUtils.hasText(code)) {
             wrapper.like(Barrier::getCode, code);
         }
@@ -38,8 +41,11 @@ public class BarrierServiceImpl implements BarrierService {
     }
 
     @Override
-    public List<Barrier> list(String code, String name, String status) {
+    public List<Barrier> list(Long tenantId, String code, String name, String status) {
         LambdaQueryWrapper<Barrier> wrapper = new LambdaQueryWrapper<>();
+        if (tenantId != null && tenantId > 0) {
+            wrapper.eq(Barrier::getTenantId, tenantId);
+        }
         if (StringUtils.hasText(code)) {
             wrapper.like(Barrier::getCode, code);
         }

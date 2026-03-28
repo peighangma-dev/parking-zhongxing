@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @TableName("payment")
 public class Payment extends BaseEntity {
 
+    private Long tenantId;
+
     private String orderNo;
 
     private Long passRecordId;

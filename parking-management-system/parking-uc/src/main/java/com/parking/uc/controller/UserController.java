@@ -3,6 +3,7 @@ package com.parking.uc.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.parking.common.core.Result;
 import com.parking.uc.entity.SysUser;
+import com.parking.uc.entity.SysRole;
 import com.parking.uc.service.UserService;
 import com.parking.uc.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,15 @@ public class UserController {
         if (user == null) {
             return Result.error("用户不存在");
         }
-        List<Long> roleIds = userService.getRoleIds(userId);
+        List<SysRole> roles = userService.getUserRoles(userId);
+        boolean isSuperAdmin = roles.stream().anyMatch(r -> "SUPER_ADMIN".equals(r.getRoleCode()));
         Map<String, Object> result = new HashMap<>();
         result.put("userId", user.getId());
         result.put("username", user.getUsername());
         result.put("nickname", user.getNickname());
-        result.put("roleIds", roleIds);
+        result.put("tenantId", user.getTenantId());
+        result.put("isSuperAdmin", isSuperAdmin);
+        result.put("roles", roles);
         return Result.success(result);
     }
 

@@ -12,10 +12,22 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    const tenantId = localStorage.getItem('tenantId')
+    
+    const tenantId = localStorage.getItem('selectedTenantId')
     if (tenantId) {
       config.headers['X-Tenant-Id'] = tenantId
     }
+    
+    const tenantCode = localStorage.getItem('tenantCode')
+    if (tenantCode) {
+      config.headers['X-Tenant-Code'] = tenantCode
+    }
+    
+    const isSuperAdmin = localStorage.getItem('isSuperAdmin')
+    if (isSuperAdmin === 'true') {
+      config.headers['X-Super-Admin'] = 'true'
+    }
+    
     return config
   },
   (error) => {
@@ -43,8 +55,6 @@ request.interceptors.response.use(
           localStorage.removeItem('userId')
           localStorage.removeItem('username')
           localStorage.removeItem('nickname')
-          localStorage.removeItem('tenantId')
-          localStorage.removeItem('tenantName')
           ElMessage.error('登录已过期，请重新登录')
           window.location.href = '/login'
           break

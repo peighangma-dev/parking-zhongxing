@@ -9,6 +9,7 @@ USE parking_db;
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS barrier (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     code VARCHAR(32) NOT NULL COMMENT '设备编码',
     name VARCHAR(64) NOT NULL COMMENT '设备名称',
     location VARCHAR(128) DEFAULT NULL COMMENT '安装位置',
@@ -19,7 +20,8 @@ CREATE TABLE IF NOT EXISTS barrier (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_code (code)
+    UNIQUE KEY uk_code (code),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='道闸设备表';
 
 -- ----------------------------
@@ -27,6 +29,7 @@ CREATE TABLE IF NOT EXISTS barrier (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS lane (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     barrier_id BIGINT NOT NULL COMMENT '所属道闸ID',
     lane_name VARCHAR(32) NOT NULL COMMENT '车道名称',
     lane_type VARCHAR(16) NOT NULL COMMENT '类型: entry/exit',
@@ -37,7 +40,8 @@ CREATE TABLE IF NOT EXISTS lane (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (id),
-    KEY idx_barrier_id (barrier_id)
+    KEY idx_barrier_id (barrier_id),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='车道表';
 
 -- ----------------------------
@@ -60,6 +64,7 @@ CREATE TABLE IF NOT EXISTS owner (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS vehicle (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     plate_number VARCHAR(16) NOT NULL COMMENT '车牌号',
     plate_color VARCHAR(16) DEFAULT NULL COMMENT '车牌颜色',
     vehicle_brand VARCHAR(64) DEFAULT NULL COMMENT '车辆品牌',
@@ -72,7 +77,8 @@ CREATE TABLE IF NOT EXISTS vehicle (
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (id),
     UNIQUE KEY uk_plate_number (plate_number),
-    KEY idx_owner_id (owner_id)
+    KEY idx_owner_id (owner_id),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='车辆表';
 
 -- ----------------------------
@@ -80,6 +86,7 @@ CREATE TABLE IF NOT EXISTS vehicle (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS member (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     owner_id BIGINT NOT NULL COMMENT '车主ID',
     vehicle_id BIGINT NOT NULL COMMENT '车辆ID',
     member_type VARCHAR(16) NOT NULL DEFAULT 'monthly' COMMENT '类型: monthly/seasonal/annual/vip',
@@ -93,7 +100,8 @@ CREATE TABLE IF NOT EXISTS member (
     PRIMARY KEY (id),
     KEY idx_owner_id (owner_id),
     KEY idx_vehicle_id (vehicle_id),
-    KEY idx_status (status)
+    KEY idx_status (status),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='月卡会员表';
 
 -- ----------------------------
@@ -101,6 +109,7 @@ CREATE TABLE IF NOT EXISTS member (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS pass_record (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     plate_number VARCHAR(16) NOT NULL COMMENT '车牌号',
     lane_id BIGINT NOT NULL COMMENT '车道ID',
     pass_type VARCHAR(16) NOT NULL COMMENT '类型: entry/exit',
@@ -114,7 +123,8 @@ CREATE TABLE IF NOT EXISTS pass_record (
     PRIMARY KEY (id),
     KEY idx_plate_number (plate_number),
     KEY idx_lane_id (lane_id),
-    KEY idx_pass_time (pass_time)
+    KEY idx_pass_time (pass_time),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='通行记录表';
 
 -- ----------------------------
@@ -122,6 +132,7 @@ CREATE TABLE IF NOT EXISTS pass_record (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS payment_channel (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     channel_code VARCHAR(32) NOT NULL COMMENT '渠道编码',
     channel_name VARCHAR(64) NOT NULL COMMENT '渠道名称',
     fee_rate DECIMAL(5,4) DEFAULT 0 COMMENT '手续费率',
@@ -131,7 +142,8 @@ CREATE TABLE IF NOT EXISTS payment_channel (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_channel_code (channel_code)
+    UNIQUE KEY uk_channel_code (channel_code),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付渠道表';
 
 -- ----------------------------
@@ -139,6 +151,7 @@ CREATE TABLE IF NOT EXISTS payment_channel (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS payment (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     order_no VARCHAR(32) NOT NULL COMMENT '订单号',
     pass_record_id BIGINT DEFAULT NULL COMMENT '关联通行记录ID',
     plate_number VARCHAR(16) NOT NULL COMMENT '车牌号',
@@ -154,7 +167,8 @@ CREATE TABLE IF NOT EXISTS payment (
     PRIMARY KEY (id),
     UNIQUE KEY uk_order_no (order_no),
     KEY idx_plate_number (plate_number),
-    KEY idx_payment_status (payment_status)
+    KEY idx_payment_status (payment_status),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付记录表';
 
 -- ----------------------------
@@ -162,6 +176,7 @@ CREATE TABLE IF NOT EXISTS payment (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS rate_rule (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
     rule_name VARCHAR(64) NOT NULL COMMENT '规则名称',
     rule_type VARCHAR(16) NOT NULL DEFAULT 'default' COMMENT '类型: default/weekend/holiday/night',
     first_hour_fee DECIMAL(10,2) NOT NULL COMMENT '首小时费用',
@@ -173,7 +188,8 @@ CREATE TABLE IF NOT EXISTS rate_rule (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    KEY idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='费率规则表';
 
 -- ----------------------------
