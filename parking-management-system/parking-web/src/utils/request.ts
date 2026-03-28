@@ -1,10 +1,17 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 const request = axios.create({
   baseURL: '/api',
   timeout: 30000
 })
+
+let routerInstance: any = null
+
+export const setRouter = (router: any) => {
+  routerInstance = router
+}
 
 request.interceptors.request.use(
   (config) => {
@@ -29,7 +36,18 @@ request.interceptors.response.use(
     return res.data
   },
   (error) => {
-    ElMessage.error(error.message || '网络错误')
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('userId')
+      localStorage.removeItem('username')
+      if (routerInstance) {
+        routerInstance.push('/login')
+      } else {
+        window.location.href = '/login'
+      }
+    } else {
+      ElMessage.error(error.message || '网络错误')
+    }
     return Promise.reject(error)
   }
 )

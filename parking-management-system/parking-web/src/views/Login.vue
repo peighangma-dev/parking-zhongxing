@@ -30,7 +30,7 @@ const router = useRouter()
 const loading = ref(false)
 const form = reactive({
   username: 'admin',
-  password: 'admin123'
+  password: 'admin'
 })
 
 const handleLogin = async () => {
