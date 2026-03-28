@@ -22,6 +22,7 @@
         <module>parking-uc</module>
         <module>parking-space</module>
         <module>parking-oss</module>
+        <module>parking-oss/parking-oss-api</module>
         <module>parking-invoice</module>
         <module>parking-monitor</module>
         <module>parking-tenant</module>
