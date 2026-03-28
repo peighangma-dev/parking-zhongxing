@@ -21,6 +21,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
         
         if (path.startsWith("/api/uc/v1/login") || 
             path.startsWith("/api/uc/v1/users/login") || 
+            path.startsWith("/api/tenant/") ||
+            path.startsWith("/api/package/") ||
             path.startsWith("/swagger") ||
             path.startsWith("/v3/api-docs") ||
             path.startsWith("/actuator")) {

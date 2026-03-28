@@ -1,61 +1,98 @@
 package com.parking.tenant.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.parking.common.core.Result;
+import com.parking.tenant.dto.TenantLoginDTO;
+import com.parking.tenant.dto.TenantRegisterDTO;
+import com.parking.tenant.entity.Package;
 import com.parking.tenant.entity.Tenant;
+import com.parking.tenant.service.PackageService;
 import com.parking.tenant.service.TenantService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/tenant/v1")
-@RequiredArgsConstructor
+@RequestMapping("/api/tenant")
 public class TenantController {
 
-    private final TenantService tenantService;
+    @Autowired
+    private TenantService tenantService;
 
-    @GetMapping("/page")
-    public Result<IPage<Tenant>> page(
-            @RequestParam(defaultValue = "1") Integer current,
-            @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String tenantName) {
-        return Result.success(tenantService.page(current, size, tenantName));
+    @Autowired
+    private PackageService packageService;
+
+    @GetMapping("/packages")
+    public List<Package> getPackages() {
+        return packageService.getEnabledPackages();
     }
 
-    @GetMapping("/{id}")
-    public Result<Tenant> getById(@PathVariable Long id) {
-        return Result.success(tenantService.getById(id));
+    @PostMapping("/register")
+    public Map<String, Object> register(@RequestBody TenantRegisterDTO dto) {
+        Map<String, Object> result = new HashMap<>();
+        
+        Tenant existing = tenantService.getByTenantCode(dto.getTenantCode());
+        if (existing != null) {
+            result.put("success", false);
+            result.put("message", "租户编码已存在");
+            return result;
+        }
+
+        Tenant tenant = new Tenant();
+        tenant.setTenantCode(dto.getTenantCode());
+        tenant.setTenantName(dto.getTenantName());
+        tenant.setContactName(dto.getContactName());
+        tenant.setContactPhone(dto.getContactPhone());
+        tenant.setContactEmail(dto.getContactEmail());
+        tenant.setPackageId(dto.getPackageId());
+        tenant.setStatus("active");
+        tenant.setMaxUsers(10);
+        tenant.setMaxSpaces(100);
+
+        boolean success = tenantService.registerTenant(tenant);
+        result.put("success", success);
+        result.put("message", success ? "注册成功" : "注册失败");
+        return result;
     }
 
-    @GetMapping("/code/{code}")
-    public Result<Tenant> getByCode(@PathVariable String code) {
-        return Result.success(tenantService.getByCode(code));
+    @PostMapping("/login")
+    public Map<String, Object> login(@RequestBody TenantLoginDTO dto) {
+        Map<String, Object> result = new HashMap<>();
+        
+        Tenant tenant = tenantService.getByTenantCode(dto.getTenantCode());
+        if (tenant == null) {
+            result.put("success", false);
+            result.put("message", "租户不存在");
+            return result;
+        }
+
+        if (!"active".equals(tenant.getStatus())) {
+            result.put("success", false);
+            result.put("message", "租户已被禁用");
+            return result;
+        }
+
+        result.put("success", true);
+        result.put("tenantId", tenant.getId());
+        result.put("tenantCode", tenant.getTenantCode());
+        result.put("tenantName", tenant.getTenantName());
+        result.put("packageId", tenant.getPackageId());
+        return result;
     }
 
-    @PostMapping
-    public Result<Tenant> create(@RequestBody Tenant tenant) {
-        return Result.success(tenantService.create(tenant));
+    @GetMapping("/info/{tenantCode}")
+    public Tenant getTenantInfo(@PathVariable String tenantCode) {
+        return tenantService.getByTenantCode(tenantCode);
     }
 
-    @PutMapping("/{id}")
-    public Result<Tenant> update(@PathVariable Long id, @RequestBody Tenant tenant) {
-        return Result.success(tenantService.update(id, tenant));
+    @GetMapping("/list")
+    public List<Tenant> list() {
+        return tenantService.list();
     }
 
-    @DeleteMapping("/{id}")
-    public Result<Boolean> delete(@PathVariable Long id) {
-        return Result.success(tenantService.delete(id));
-    }
-
-    @GetMapping("/{id}/features")
-    public Result<List<String>> getFeatures(@PathVariable Long id) {
-        return Result.success(tenantService.getEnabledFeatures(id));
-    }
-
-    @GetMapping("/{id}/check/{featureCode}")
-    public Result<Boolean> checkFeature(@PathVariable Long id, @PathVariable String featureCode) {
-        return Result.success(tenantService.checkFeature(id, featureCode));
+    @PutMapping("/status/{id}")
+    public boolean updateStatus(@PathVariable Long id, @RequestParam String status) {
+        return tenantService.updateTenantStatus(id, status);
     }
 }

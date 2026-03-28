@@ -92,6 +92,21 @@ const router = createRouter({
           path: '/uc/role',
           name: 'RoleManage',
           component: () => import('@/views/uc/Role.vue')
+        },
+        {
+          path: '/admin/tenant',
+          name: 'TenantManage',
+          component: () => import('@/views/admin/Tenant.vue')
+        },
+        {
+          path: '/admin/package',
+          name: 'PackageManage',
+          component: () => import('@/views/admin/Package.vue')
+        },
+        {
+          path: '/register',
+          name: 'Register',
+          component: () => import('@/views/admin/Register.vue')
         }
       ]
     }

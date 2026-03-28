@@ -61,6 +61,10 @@
             <span v-else>加 载 中...</span>
           </el-button>
         </el-form-item>
+
+        <div class="register-link">
+          <router-link to="/register">租户注册</router-link>
+        </div>
       </el-form>
 
       <div class="card-footer">
@@ -313,6 +317,23 @@ const handleLogin = async () => {
 .card-footer {
   margin-top: 30px;
   text-align: center;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.register-link a {
+  color: var(--cyber-cyan);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.register-link a:hover {
+  color: var(--cyber-magenta);
+  text-shadow: 0 0 10px var(--cyber-magenta);
 }
 
 .system-info {

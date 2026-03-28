@@ -97,6 +97,17 @@
             <el-menu-item index="/uc/user">用户管理</el-menu-item>
             <el-menu-item index="/uc/role">角色管理</el-menu-item>
           </el-sub-menu>
+
+          <el-sub-menu index="/admin">
+            <template #title>
+              <div class="menu-title-wrapper">
+                <el-icon class="menu-icon"><Key /></el-icon>
+                <span class="menu-title">超级管理员</span>
+              </div>
+            </template>
+            <el-menu-item index="/admin/tenant">租户管理</el-menu-item>
+            <el-menu-item index="/admin/package">套餐管理</el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </div>
 
@@ -166,6 +177,8 @@ const pageTitleMap: Record<string, string> = {
   '/report/monthly': '收费月报',
   '/uc/user': '用户管理',
   '/uc/role': '角色管理',
+  '/admin/tenant': '租户管理',
+  '/admin/package': '套餐管理',
 }
 const pageTitle = computed(() => pageTitleMap[route.path] || '')
 

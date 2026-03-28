@@ -25,8 +25,4 @@ public class TenantContext {
         TENANT_ID.remove();
         TENANT_CODE.remove();
     }
-
-    public static boolean hasTenant() {
-        return getTenantId() != null;
-    }
 }

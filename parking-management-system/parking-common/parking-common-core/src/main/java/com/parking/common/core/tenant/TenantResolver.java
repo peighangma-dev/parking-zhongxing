@@ -55,9 +55,13 @@ public class TenantResolver {
         if (redisTemplate != null) {
             String cacheKey = TENANT_CACHE_KEY + tenantCode;
             Object cached = redisTemplate.opsForValue().get(cacheKey);
-            if (cached != null) {
+            if (cached != null && cached instanceof Map) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> tenant = (Map<String, Object>) cached;
-                TenantContext.setTenantId(((Number) tenant.get("id")).longValue();
+                Object idObj = tenant.get("id");
+                if (idObj instanceof Number) {
+                    TenantContext.setTenantId(((Number) idObj).longValue());
+                }
             }
         }
     }
