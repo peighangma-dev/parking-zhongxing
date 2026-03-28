@@ -19,6 +19,21 @@ const router = createRouter({
           component: () => import('@/views/Dashboard.vue')
         },
         {
+          path: '/parking/lot',
+          name: 'ParkingLot',
+          component: () => import('@/views/parking/Lot.vue')
+        },
+        {
+          path: '/parking/area',
+          name: 'ParkingArea',
+          component: () => import('@/views/space/Area.vue')
+        },
+        {
+          path: '/parking/space',
+          name: 'ParkingSpace',
+          component: () => import('@/views/space/Space.vue')
+        },
+        {
           path: '/barrier/device',
           name: 'BarrierDevice',
           component: () => import('@/views/barrier/Device.vue')
@@ -27,16 +42,6 @@ const router = createRouter({
           path: '/barrier/lane',
           name: 'BarrierLane',
           component: () => import('@/views/barrier/Lane.vue')
-        },
-        {
-          path: '/payment/channel',
-          name: 'PaymentChannel',
-          component: () => import('@/views/payment/Channel.vue')
-        },
-        {
-          path: '/payment/rate',
-          name: 'PaymentRate',
-          component: () => import('@/views/payment/Rate.vue')
         },
         {
           path: '/vehicle/list',
@@ -54,14 +59,19 @@ const router = createRouter({
           component: () => import('@/views/vehicle/Blacklist.vue')
         },
         {
-          path: '/space/area',
-          name: 'SpaceArea',
-          component: () => import('@/views/space/Area.vue')
+          path: '/payment/channel',
+          name: 'PaymentChannel',
+          component: () => import('@/views/payment/Channel.vue')
         },
         {
-          path: '/space/space',
-          name: 'SpaceSpace',
-          component: () => import('@/views/space/Space.vue')
+          path: '/payment/rate',
+          name: 'PaymentRate',
+          component: () => import('@/views/payment/Rate.vue')
+        },
+        {
+          path: '/payment/record',
+          name: 'PaymentRecord',
+          component: () => import('@/views/payment/Record.vue')
         },
         {
           path: '/report/pass',
@@ -77,11 +87,6 @@ const router = createRouter({
           path: '/uc/user',
           name: 'UserManage',
           component: () => import('@/views/uc/UserManage.vue')
-        },
-        {
-          path: '/uc/parking-lot',
-          name: 'ParkingLotManage',
-          component: () => import('@/views/uc/ParkingLotManage.vue')
         }
       ]
     }
