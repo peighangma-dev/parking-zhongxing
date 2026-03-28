@@ -271,6 +271,24 @@ parking-web/             - Vue 3 前端应用
 - 角色管理
   - 角色权限配置
   - 菜单权限分配
+- 菜单管理
+  - 树形菜单结构
+  - 支持目录/菜单/按钮三种类型
+  - 菜单CRUD操作
+- 操作日志
+  - 用户操作记录追踪
+  - 按模块/操作类型/时间筛选
+  - 批量删除/导出功能
+- 登录日志
+  - 登录历史记录
+  - 显示IP/浏览器/操作系统/登录地点
+  - 批量删除/清空30天前日志
+- 系统配置
+  - 基本设置 (系统名称/Logo/描述)
+  - 安全设置 (密码策略/登录锁定/Token配置)
+  - 业务设置 (费率/免费停车时长/月卡规则)
+  - 通知设置 (邮件/SMS通知配置)
+  - 文件存储 (本地/OSS/COS/MinIO配置)
 
 【超级管理员功能】
 ------------------------------------------------------------------------------
@@ -289,10 +307,42 @@ GET    /api/uc/v1/current                - 获取当前用户信息
 GET    /api/uc/v1/users/page             - 用户分页列表
 POST   /api/uc/v1/users                  - 创建用户
 PUT    /api/uc/v1/users/{id}             - 更新用户
-DELETE /api/uc/v1/users/{id}             - 删除用户
-PUT    /api/uc/v1/users/{id}/password    - 修改密码
-GET    /api/uc/v1/users/{id}/roles       - 获取用户角色
+DELETE /api/uc/v1/users/{id}              - 删除用户
+PUT    /api/uc/v1/users/{id}/password   - 修改密码
+GET    /api/uc/v1/users/{id}/roles      - 获取用户角色
 PUT    /api/uc/v1/users/{id}/roles       - 分配角色
+
+【UC服务 - 角色管理】  /api/uc/
+------------------------------------------------------------------------------
+GET    /api/uc/v1/roles/page             - 角色分页列表
+GET    /api/uc/v1/roles/all              - 所有角色列表
+POST   /api/uc/v1/roles                   - 创建角色
+PUT    /api/uc/v1/roles/{id}              - 更新角色
+DELETE /api/uc/v1/roles/{id}              - 删除角色
+
+【UC服务 - 菜单管理】  /api/uc/
+------------------------------------------------------------------------------
+GET    /api/uc/v1/menus/tree             - 菜单树形结构
+GET    /api/uc/v1/menus/by-role/{roleId} - 获取角色菜单权限
+POST   /api/uc/v1/menus                  - 创建菜单
+PUT    /api/uc/v1/menus/{id}              - 更新菜单
+DELETE /api/uc/v1/menus/{id}              - 删除菜单
+PUT    /api/uc/v1/menus/role/{roleId}/menus - 分配角色菜单
+
+【UC服务 - 日志管理】  /api/uc/
+------------------------------------------------------------------------------
+GET    /api/uc/v1/logs/operation/page    - 操作日志分页
+DELETE /api/uc/v1/logs/operation/{id}    - 删除操作日志
+POST   /api/uc/v1/logs/operation/batch-delete - 批量删除操作日志
+GET    /api/uc/v1/logs/login/page       - 登录日志分页
+DELETE /api/uc/v1/logs/login/{id}        - 删除登录日志
+POST   /api/uc/v1/logs/login/batch-delete - 批量删除登录日志
+DELETE /api/uc/v1/logs/login/clear      - 清空30天前登录日志
+
+【UC服务 - 系统配置】  /api/uc/
+------------------------------------------------------------------------------
+GET    /api/uc/v1/config                 - 获取系统配置
+PUT    /api/uc/v1/config                 - 保存系统配置
 
 【Tenant服务 - 租户管理】  /api/tenant/
 ------------------------------------------------------------------------------
