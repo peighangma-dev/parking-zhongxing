@@ -141,25 +141,30 @@ parking-web/             - Vue 3 前端应用
    - balance            - 账户余额
    - status             - 状态 (active/expired/cancelled)
 
-7. pass_record         - 通行记录表
-   - id                 - 主键ID
-   - tenant_id          - 租户ID
-   - plate_number       - 车牌号
-   - lane_id            - 车道ID
-   - pass_type          - 类型 (entry/exit)
-   - pass_status        - 状态 (normal/abnormal)
-   - recognition_confidence - 识别置信度
-   - image_url          - 抓拍图片URL
-   - fee_calculated     - 计算费用
-   - pass_time          - 通行时间
+ 7. pass_record         - 通行记录表
+    - id                 - 主键ID
+    - tenant_id          - 租户ID
+    - plate_number       - 车牌号
+    - lane_id            - 车道ID
+    - pass_type          - 类型 (entry/exit)
+    - pass_status        - 状态 (normal/abnormal)
+    - recognition_confidence - 识别置信度
+    - image_url          - 抓拍图片URL
+    - fee_calculated     - 计算费用
+    - pass_time          - 通行时间
+    - created_at         - 创建时间
+    - updated_at         - 更新时间
 
-8. payment_channel     - 支付渠道表
-   - id                 - 主键ID
-   - tenant_id          - 租户ID
-   - channel_code       - 渠道编码
-   - channel_name       - 渠道名称
-   - fee_rate           - 手续费率
-   - status             - 状态 (enabled/disabled)
+ 8. payment_channel     - 支付渠道表
+    - id                 - 主键ID
+    - tenant_id          - 租户ID
+    - channel_code       - 渠道编码
+    - channel_name       - 渠道名称
+    - fee_rate           - 手续费率
+    - config             - 渠道配置JSON
+    - description        - 描述
+    - status             - 状态 (enabled/disabled)
+    - sort_order         - 排序
 
 9. payment             - 支付记录表
    - id                 - 主键ID
@@ -199,9 +204,10 @@ parking-web/             - Vue 3 前端应用
 ------------------------------------------------------------------------------
 12. sys_user           - 系统用户表
 13. sys_role           - 角色表
-14. sys_menu           - 菜单表
+14. sys_menu           - 菜单表 (含 tenant_id 字段)
 15. sys_user_role      - 用户角色关联表
 16. sys_role_menu      - 角色菜单关联表
+17. sys_package_feature - 套餐功能表
 
 
 五、功能模块
@@ -363,6 +369,11 @@ POST   /api/package/v1                   - 创建套餐
 PUT    /api/package/v1/{id}              - 更新套餐
 DELETE /api/package/v1/{id}              - 删除套餐
 
+【Tenant服务 - 租户功能】  /api/tenant/
+------------------------------------------------------------------------------
+GET    /api/tenant/v1/features/{tenantId} - 获取租户功能列表
+GET    /api/tenant/v1/features/check     - 检查租户功能权限
+
 【Barrier服务 - 道闸设备】  /api/barrier/
 ------------------------------------------------------------------------------
 GET    /api/barrier/v1/devices/page     - 设备分页列表
@@ -421,6 +432,10 @@ GET    /api/payment/v1/channels         - 渠道列表
 POST   /api/payment/v1/channels         - 创建渠道
 PUT    /api/payment/v1/channels/{id}    - 更新渠道
 DELETE /api/payment/v1/channels/{id}    - 删除渠道
+
+【Report服务 - 报表统计】  /api/report/
+------------------------------------------------------------------------------
+GET    /api/report/v1/pass-records/page - 通行记录分页
 
 
 七、安全特性
@@ -556,10 +571,20 @@ DELETE /api/payment/v1/channels/{id}    - 删除渠道
 
 十一、版本信息
 ===============================================================================
-当前版本: v2.0.26
+当前版本: v2.0.27
 构建时间: 2026-03-28
 作者: Parking Development Team
 
+
+十二、Git 分支说明
+===============================================================================
+当前分支: 260328-fix-security-and-complete-features
+
+主要提交记录:
+- 安全修复: JWT/BCrypt/支付回调签名
+- 功能增强: 超级管理员多租户查看
+- 系统管理: 菜单管理/操作日志/登录日志/系统配置
+- 文档更新: README.txt 详细说明
 
 ===============================================================================
                               文档结束
