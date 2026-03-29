@@ -70,144 +70,417 @@ parking-common/
 parking-web/             - Vue 3 前端应用
 
 
-四、数据库表结构
-===============================================================================
+ 四、数据库表结构 (parking_db)
+================================================================================ 
 
-【核心业务表】
+【系统基础表】
 ------------------------------------------------------------------------------
-1. tenant                - 租户表
+1. sys_tenant            - 租户表
    - id                 - 主键ID
    - tenant_code        - 租户编码 (唯一)
    - tenant_name        - 租户名称
-   - contact_name       - 联系人
+   - contact_name       - 联系人姓名
    - contact_phone      - 联系电话
    - contact_email      - 联系邮箱
-   - package_id         - 套餐ID
-   - status             - 状态 (active/disabled)
-   - expire_time        - 到期时间
-   - max_users          - 最大用户数
-   - max_spaces         - 最大车位数
-   - created_at         - 创建时间
+   - domain            - 域名
+   - package_id        - 套餐ID
+   - expire_time       - 到期时间
+   - max_users         - 最大用户数
+   - max_spaces        - 最大车位数
+   - status            - 状态 (active/inactive/suspended)
+   - created_at        - 创建时间
+   - updated_at        - 更新时间
+   - deleted           - 逻辑删除
 
-2. package_info          - 套餐表
+2. sys_user             - 系统用户表
    - id                 - 主键ID
-   - package_code       - 套餐编码
-   - package_name       - 套餐名称
-   - package_type       - 套餐类型
-   - price              - 价格
-   - duration_days      - 时长(天)
-   - features           - 功能特性 (JSON格式)
-   - status             - 状态
+   - username           - 用户名 (唯一)
+   - password           - 密码 (BCrypt加密)
+   - nickname           - 昵称
+   - phone             - 手机号
+   - email             - 邮箱
+   - avatar            - 头像URL
+   - status            - 状态 (normal/disabled)
+   - last_login_time   - 最后登录时间
+   - tenant_id         - 租户ID
+   - created_at        - 创建时间
+   - updated_at        - 更新时间
+   - deleted           - 逻辑删除
 
-3. barrier              - 道闸设备表
+3. sys_role            - 角色表
    - id                 - 主键ID
-   - tenant_id          - 租户ID
-   - code               - 设备编码 (唯一)
-   - name               - 设备名称
-   - location           - 安装位置
-   - total_lanes        - 车道数量
-   - status             - 状态 (online/offline/fault)
-   - raise_timeout      - 抬杆超时秒数
+   - role_code         - 角色编码 (唯一)
+   - role_name         - 角色名称
+   - description       - 描述
+   - tenant_id         - 租户ID
+   - status            - 状态 (normal/disabled)
+   - created_at        - 创建时间
+   - updated_at        - 更新时间
+   - deleted           - 逻辑删除
 
-4. lane                - 车道表
+4. sys_user_role       - 用户角色关联表
    - id                 - 主键ID
-   - tenant_id          - 租户ID
-   - barrier_id         - 所属道闸ID
-   - lane_name          - 车道名称
-   - lane_type          - 类型 (entry/exit)
-   - camera_id          - 相机设备ID
-   - barrier_controller_id - 道闸控制器ID
-   - status             - 状态
+   - user_id           - 用户ID
+   - role_id           - 角色ID
+   - tenant_id         - 租户ID
+   - created_at        - 创建时间
+   - updated_at        - 更新时间
+   - deleted           - 逻辑删除
 
-5. vehicle             - 车辆表
+5. sys_menu            - 菜单权限表
    - id                 - 主键ID
-   - tenant_id          - 租户ID
-   - plate_number       - 车牌号 (唯一)
-   - plate_color        - 车牌颜色
-   - vehicle_brand      - 车辆品牌
-   - vehicle_type       - 车型 (sedan/suv/truck)
-   - owner_id           - 车主ID
-   - vehicle_type_cat   - 分类 (monthly/temp/vip/blacklist)
-   - status             - 状态 (normal/disabled)
+   - parent_id         - 父菜单ID
+   - menu_name         - 菜单名称
+   - menu_type         - 类型 (directory/menu/button)
+   - path              - 路由路径
+   - component         - 组件路径
+   - icon             - 图标
+   - permission       - 权限标识
+   - sort_order       - 排序
+   - tenant_id         - 租户ID
+   - created_at        - 创建时间
+   - updated_at        - 更新时间
+   - deleted           - 逻辑删除
 
-6. member              - 月卡会员表
+6. sys_role_menu       - 角色菜单关联表
    - id                 - 主键ID
-   - tenant_id          - 租户ID
-   - owner_id           - 车主ID
-   - vehicle_id         - 车辆ID
-   - member_type        - 类型 (monthly/seasonal/annual/vip)
-   - start_date         - 生效日期
-   - end_date           - 到期日期
-   - balance            - 账户余额
-   - status             - 状态 (active/expired/cancelled)
+   - role_id           - 角色ID
+   - menu_id           - 菜单ID
+   - created_at        - 创建时间
+   - deleted           - 逻辑删除
 
- 7. pass_record         - 通行记录表
-    - id                 - 主键ID
-    - tenant_id          - 租户ID
-    - plate_number       - 车牌号
-    - lane_id            - 车道ID
-    - pass_type          - 类型 (entry/exit)
-    - pass_status        - 状态 (normal/abnormal)
-    - recognition_confidence - 识别置信度
-    - image_url          - 抓拍图片URL
-    - fee_calculated     - 计算费用
-    - pass_time          - 通行时间
-    - created_at         - 创建时间
-    - updated_at         - 更新时间
-
- 8. payment_channel     - 支付渠道表
-    - id                 - 主键ID
-    - tenant_id          - 租户ID
-    - channel_code       - 渠道编码
-    - channel_name       - 渠道名称
-    - fee_rate           - 手续费率
-    - config             - 渠道配置JSON
-    - description        - 描述
-    - status             - 状态 (enabled/disabled)
-    - sort_order         - 排序
-
-9. payment             - 支付记录表
+7. sys_package         - 套餐表
    - id                 - 主键ID
-   - tenant_id          - 租户ID
-   - order_no           - 订单号 (唯一)
-   - pass_record_id     - 关联通行记录ID
-   - plate_number       - 车牌号
-   - amount_due         - 应付金额
-   - amount_paid        - 实付金额
-   - payment_channel_id - 支付渠道ID
-   - payment_status     - 状态 (pending/paid/refunded/reversed)
-   - payment_time       - 支付时间
-   - transaction_id     - 第三方交易号
+   - package_code      - 套餐编码 (唯一)
+   - package_name     - 套餐名称
+   - package_type     - 套餐类型
+   - description      - 描述
+   - max_users        - 最大用户数
+   - max_spaces       - 最大车位数
+   - max_devices      - 最大设备数
+   - price            - 价格
+   - sort_order       - 排序
+   - status           - 状态 (enabled/disabled)
+   - created_at        - 创建时间
+   - updated_at        - 更新时间
+   - deleted           - 逻辑删除
 
-10. rate_rule          - 费率规则表
-    - id                 - 主键ID
-    - tenant_id          - 租户ID
-    - rule_name          - 规则名称
-    - rule_type          - 类型 (default/weekend/holiday/night)
-    - first_hour_fee     - 首小时费用
-    - subsequent_fee     - 续费费用
-    - daily_max_fee      - 24小时封顶
-    - vehicle_category   - 适用车型
-    - priority           - 优先级
-    - status             - 状态
+8. sys_package_feature - 套餐功能表
+   - id                 - 主键ID
+   - package_id        - 套餐ID
+   - feature_code      - 功能代码
+   - feature_name      - 功能名称
+   - enabled           - 是否启用 (0/1)
+   - created_at        - 创建时间
 
-11. blacklist          - 黑名单表
-    - id                 - 主键ID
-    - tenant_id          - 租户ID
-    - vehicle_id         - 车辆ID
-    - reason             - 加入原因
-    - operator_id        - 操作人ID
-    - created_at         - 创建时间
-    - updated_at         - 更新时间
-
-【系统表】
+【停车场业务表】
 ------------------------------------------------------------------------------
-12. sys_user           - 系统用户表
-13. sys_role           - 角色表
-14. sys_menu           - 菜单表 (含 tenant_id 字段)
-15. sys_user_role      - 用户角色关联表
-16. sys_role_menu      - 角色菜单关联表
-17. sys_package_feature - 套餐功能表
+9. parking_lot         - 停车场表
+   - id                 - 主键ID
+   - lot_name         - 停车场名称
+   - lot_code         - 停车场编码 (唯一)
+   - address           - 地址
+   - total_spaces     - 总车位数
+   - occupied_spaces   - 已占用车位数
+   - contact_person   - 联系人
+   - contact_phone   - 联系电话
+   - status           - 状态 (normal/disabled)
+   - description      - 描述
+   - tenant_id        - 租户ID
+   - created_at        - 创建时间
+   - updated_at        - 更新时间
+   - deleted           - 逻辑删除
+
+10. parking_area       - 停车场区域表
+    - id                 - 主键ID
+    - area_name        - 区域名称
+    - total_spaces     - 总车位数量
+    - occupied_spaces  - 已占用数量
+    - floor            - 楼层
+    - status           - 状态 (normal/maintenance/closed)
+    - tenant_id        - 租户ID
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+11. parking_space      - 车位表
+    - id                 - 主键ID
+    - space_number     - 车位编号 (唯一)
+    - area_id           - 所属区域ID
+    - space_type       - 类型 (standard/large/disabled/electric)
+    - status           - 状态 (empty/occupied/reserved)
+    - tenant_id        - 租户ID
+    - vehicle_plate    - 当前车牌号
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+12. barrier           - 道闸设备表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - code             - 设备编码 (唯一)
+    - name              - 设备名称
+    - location         - 安装位置
+    - total_lanes      - 车道数量
+    - status           - 状态 (online/offline/fault)
+    - raise_timeout    - 抬杆超时秒数
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+13. lane              - 车道表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - barrier_id       - 所属道闸ID
+    - lane_name        - 车道名称
+    - lane_type        - 类型 (entry/exit)
+    - camera_id        - 相机设备ID
+    - barrier_controller_id - 道闸控制器ID
+    - status           - 状态 (normal/maintenance/fault)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+14. camera            - 摄像头表
+    - id                 - 主键ID
+    - camera_code      - 摄像头编码 (唯一)
+    - camera_name      - 摄像头名称
+    - lane_id          - 关联车道ID
+    - ip_address      - IP地址
+    - port             - 端口
+    - username         - 用户名
+    - password         - 密码
+    - channel         - 通道号
+    - stream_url      - 流地址
+    - status           - 状态 (online/offline/fault)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+【车辆管理表】
+------------------------------------------------------------------------------
+15. owner              - 车主信息表
+    - id                 - 主键ID
+    - name             - 车主姓名
+    - phone            - 联系电话 (唯一)
+    - id_card          - 身份证号
+    - address          - 联系地址
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+16. vehicle            - 车辆表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - plate_number     - 车牌号 (唯一)
+    - plate_color      - 车牌颜色
+    - vehicle_brand   - 车辆品牌
+    - vehicle_type    - 车型 (sedan/suv/truck)
+    - owner_id        - 车主ID
+    - vehicle_type_cat - 分类 (monthly/temp/vip/blacklist)
+    - status           - 状态 (normal/disabled)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+17. blacklist         - 黑名单表
+    - id                 - 主键ID
+    - vehicle_id       - 车辆ID
+    - reason           - 加入原因
+    - created_at        - 创建时间
+    - created_by       - 创建人ID
+    - tenant_id        - 租户ID
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+18. member            - 月卡会员表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - owner_id         - 车主ID
+    - vehicle_id       - 车辆ID
+    - member_type     - 类型 (monthly/seasonal/annual/vip)
+    - start_date       - 生效日期
+    - end_date         - 到期日期
+    - balance         - 账户余额
+    - status           - 状态 (active/expired/cancelled)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+【通行支付表】
+------------------------------------------------------------------------------
+19. pass_record        - 通行记录表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - plate_number     - 车牌号
+    - lane_id          - 车道ID
+    - pass_type        - 类型 (entry/exit)
+    - pass_status      - 状态 (normal/abnormal)
+    - recognition_confidence - 识别置信度
+    - image_url        - 抓拍图片URL
+    - fee_calculated   - 计算费用
+    - pass_time        - 通行时间
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+20. rate_rule          - 费率规则表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - rule_name        - 规则名称
+    - rule_type       - 类型 (default/weekend/holiday/night)
+    - first_hour_fee  - 首小时费用
+    - subsequent_fee  - 续费费用
+    - daily_max_fee   - 24小时封顶
+    - vehicle_category - 适用车型 (all/small/large)
+    - priority        - 优先级
+    - status           - 状态 (active/inactive)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+21. payment_channel    - 支付渠道表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - channel_code     - 渠道编码 (唯一)
+    - channel_name     - 渠道名称
+    - fee_rate        - 手续费率
+    - config          - 渠道配置JSON
+    - description     - 描述
+    - status           - 状态 (enabled/disabled)
+    - sort_order      - 排序
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+22. payment           - 支付记录表
+    - id                 - 主键ID
+    - tenant_id        - 租户ID
+    - order_no         - 订单号 (唯一)
+    - pass_record_id   - 关联通行记录ID
+    - plate_number     - 车牌号
+    - amount_due      - 应付金额
+    - amount_paid     - 实付金额
+    - payment_channel_id - 支付渠道ID
+    - payment_status  - 状态 (pending/paid/refunded/reversed)
+    - payment_time   - 支付时间
+    - transaction_id  - 第三方交易号
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+【发票相关表】
+------------------------------------------------------------------------------
+23. invoice_title     - 发票抬头表
+    - id                 - 主键ID
+    - user_id          - 用户ID
+    - title_type       - 类型 (personal/enterprise)
+    - company_name     - 公司名称
+    - tax_number      - 税号
+    - bank_name       - 开户银行
+    - bank_account    - 银行账号
+    - address          - 地址
+    - phone           - 电话
+    - email           - 邮箱
+    - is_default     - 是否默认 (0/1)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+24. invoice           - 发票表
+    - id                 - 主键ID
+    - invoice_no       - 发票号 (唯一)
+    - user_id          - 用户ID
+    - title_id         - 发票抬头ID
+    - plate_number     - 车牌号
+    - amount          - 发票金额
+    - tax_amount      - 税额
+    - status           - 状态 (pending/approved/issued/rejected)
+    - invoice_type    - 类型 (normal/special)
+    - billing_time   - 开票时间
+    - sending_type   - 发送方式 (email/快递)
+    - invoice_url    - 发票PDF URL
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+【其他业务表】
+------------------------------------------------------------------------------
+25. alarm             - 报警记录表
+    - id                 - 主键ID
+    - alarm_type      - 报警类型
+    - camera_id       - 摄像头ID
+    - lane_id         - 车道ID
+    - alarm_time      - 报警时间
+    - alarm_level     - 级别 (low/medium/high)
+    - description    - 描述
+    - image_url       - 抓拍图片
+    - video_url       - 关联视频
+    - status          - 状态 (pending/confirmed/resolved)
+    - confirmed_by    - 确认人
+    - confirmed_time - 确认时间
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+26. file_info         - 文件信息表
+    - id                 - 主键ID
+    - file_name       - 文件名
+    - file_path       - 文件路径
+    - file_url        - 访问URL
+    - file_size       - 文件大小(字节)
+    - file_type       - 文件类型/MIME
+    - storage_type    - 存储类型 (local/aliyun/qiniu/tencent)
+    - bucket_name     - 存储桶名称
+    - created_by      - 上传人ID
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+27. storage_config    - 存储配置表
+    - id                 - 主键ID
+    - config_key      - 配置键 (唯一)
+    - provider        - 提供商 (aliyun/qiniu/tencent)
+    - access_key     - 访问密钥
+    - secret_key     - 私有密钥
+    - bucket_name    - 存储桶名称
+    - endpoint       - 接入点
+    - domain         - 自定义域名
+    - status          - 状态 (enabled/disabled)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+28. video_record      - 视频录像表
+    - id                 - 主键ID
+    - camera_id       - 摄像头ID
+    - start_time     - 开始时间
+    - end_time       - 结束时间
+    - file_path      - 文件路径
+    - file_size     - 文件大小
+    - record_type   - 类型 (continuous/motion/alarm)
+    - created_at        - 创建时间
+    - updated_at        - 更新时间
+    - deleted           - 逻辑删除
+
+29. operation_log     - 操作日志表
+    - id                 - 主键ID
+    - user_id         - 操作人ID
+    - username        - 操作人用户名
+    - operation      - 操作类型
+    - module         - 操作模块
+    - method         - 方法名
+    - request_url    - 请求URL
+    - request_method - 请求方法
+    - request_params - 请求参数
+    - response_result - 响应结果
+    - ip_address    - IP地址
+    - user_agent    - 用户代理
+    - execution_time - 执行时长(毫秒)
+    - status         - 状态 (success/failed)
+    - error_message - 错误信息
+    - created_at        - 创建时间
+    - deleted           - 逻辑删除
 
 
 五、功能模块
