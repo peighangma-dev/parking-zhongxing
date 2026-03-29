@@ -94,4 +94,33 @@ public class TenantController {
     public Result<List<Package>> getPackages() {
         return Result.success(packageService.getEnabledPackages());
     }
+
+    @PostMapping("/register")
+    public Result<Map<String, Object>> register(@RequestBody Map<String, Object> params) {
+        String tenantCode = (String) params.get("tenantCode");
+        String tenantName = (String) params.get("tenantName");
+        String contactName = (String) params.get("contactName");
+        String contactPhone = (String) params.get("contactPhone");
+        String contactEmail = (String) params.get("contactEmail");
+        String password = (String) params.get("password");
+        Object packageIdObj = params.get("packageId");
+        Long packageId = packageIdObj != null ? Long.valueOf(packageIdObj.toString()) : null;
+        
+        Tenant tenant = new Tenant();
+        tenant.setTenantCode(tenantCode);
+        tenant.setTenantName(tenantName);
+        tenant.setContactName(contactName);
+        tenant.setContactPhone(contactPhone);
+        tenant.setContactEmail(contactEmail);
+        tenant.setPackageId(packageId);
+        tenant.setStatus("active");
+        
+        boolean success = tenantService.registerTenant(tenant);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", success);
+        result.put("tenantId", tenant.getId());
+        
+        return Result.success(result);
+    }
 }
