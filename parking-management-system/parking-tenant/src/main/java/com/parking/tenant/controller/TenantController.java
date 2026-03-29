@@ -1,7 +1,9 @@
 package com.parking.tenant.controller;
 
 import com.parking.tenant.entity.Tenant;
+import com.parking.tenant.entity.Package;
 import com.parking.tenant.service.TenantService;
+import com.parking.tenant.service.PackageService;
 import com.parking.common.core.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,9 @@ public class TenantController {
 
     @Autowired
     private TenantService tenantService;
+    
+    @Autowired
+    private PackageService packageService;
 
     @GetMapping("/page")
     public Result<Map<String, Object>> page(
@@ -83,5 +88,10 @@ public class TenantController {
     public Result<Boolean> updateStatus(@PathVariable Long id, @RequestParam String status) {
         tenantService.updateTenantStatus(id, status);
         return Result.success(true);
+    }
+
+    @GetMapping("/packages")
+    public Result<List<Package>> getPackages() {
+        return Result.success(packageService.getEnabledPackages());
     }
 }
