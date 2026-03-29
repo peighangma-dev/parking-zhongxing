@@ -65,35 +65,3 @@ public class BarrierController {
         return Result.success(barrierService.updateStatus(id, status));
     }
 }
-
-    @GetMapping("/{id}")
-    public Result<Barrier> getById(@PathVariable Long id) {
-        return Result.success(barrierService.getById(id));
-    }
-
-    @GetMapping("/code/{code}")
-    public Result<Barrier> getByCode(@PathVariable String code) {
-        return Result.success(barrierService.getByCode(code));
-    }
-
-@PostMapping
-    public Result<Barrier> save(@RequestBody Barrier barrier) {
-        return Result.success(barrierService.save(barrier));
-    }
-
-    @PutMapping("/{id}")
-    public Result<Barrier> update(@PathVariable Long id, @RequestBody Barrier barrier) {
-        barrier.setId(id);
-        return Result.success(barrierService.update(barrier));
-    }
-
-    @DeleteMapping("/{id}")
-    public Result<Boolean> delete(@PathVariable Long id) {
-        return Result.success(barrierService.delete(id));
-    }
-
-    @PostMapping("/{id}/status")
-    public Result<Boolean> updateStatus(@PathVariable Long id, @RequestParam String status) {
-        return Result.success(barrierService.updateStatus(id, status));
-    }
-}
