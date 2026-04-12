@@ -1,9 +1,12 @@
 package com.parking.payment.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.parking.common.database.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.ibatis.type.TypeHandler;
+import com.parking.common.database.handler.JsonTypeHandler;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -19,6 +22,7 @@ public class PaymentChannel extends BaseEntity {
 
     private BigDecimal feeRate;
 
+    @TableField(typeHandler = JsonTypeHandler.class)
     private Map<String, String> config;
 
     private String description;

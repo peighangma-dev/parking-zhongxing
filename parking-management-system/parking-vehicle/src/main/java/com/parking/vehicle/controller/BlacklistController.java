@@ -37,11 +37,8 @@ public class BlacklistController {
     }
 
     @PostMapping
-    public Result<Blacklist> add(
-            @RequestParam Long vehicleId,
-            @RequestParam(required = false) String reason,
-            @RequestParam(required = false) Long operatorId) {
-        return Result.success(blacklistService.add(vehicleId, reason, operatorId));
+    public Result<Blacklist> add(@RequestBody Blacklist blacklist) {
+        return Result.success(blacklistService.add(blacklist.getVehicleId(), blacklist.getReason(), null));
     }
 
     @DeleteMapping("/{id}")
