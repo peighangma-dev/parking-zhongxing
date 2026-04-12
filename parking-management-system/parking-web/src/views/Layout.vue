@@ -216,8 +216,17 @@ const loadTenants = async () => {
 const handleTenantChange = (val: number) => {
   if (val === 0) {
     localStorage.removeItem('selectedTenantId')
+    localStorage.removeItem('tenantCode')
+    localStorage.removeItem('tenantName')
   } else {
-    localStorage.setItem('selectedTenantId', String(val))
+    const tenant = tenants.value.find(t => t.id === val)
+    if (tenant) {
+      localStorage.setItem('selectedTenantId', String(val))
+      localStorage.setItem('tenantCode', tenant.tenantCode || '')
+      localStorage.setItem('tenantName', tenant.tenantName || '')
+    } else {
+      localStorage.setItem('selectedTenantId', String(val))
+    }
   }
 }
 
