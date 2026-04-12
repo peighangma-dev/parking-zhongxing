@@ -181,5 +181,32 @@ INSERT INTO blacklist (vehicle_id, reason, created_by, tenant_id, created_at, up
 (4, '多次逃费', 1, 2, NOW(), NOW());
 
 -- ============================================
+-- 19. 岗亭端 (kiosk_client)
+-- ============================================
+CREATE TABLE IF NOT EXISTS kiosk_client (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    kiosk_code VARCHAR(64) NOT NULL COMMENT '岗亭编码',
+    kiosk_name VARCHAR(128) NOT NULL COMMENT '岗亭名称',
+    barrier_id BIGINT DEFAULT NULL COMMENT '绑定的道闸ID',
+    lane_id BIGINT DEFAULT NULL COMMENT '绑定的车道ID',
+    status VARCHAR(16) NOT NULL DEFAULT 'offline' COMMENT '状态: online/offline/disabled',
+    last_heartbeat DATETIME DEFAULT NULL COMMENT '最后心跳时间',
+    ip_address VARCHAR(64) DEFAULT NULL COMMENT 'IP地址',
+    mac_address VARCHAR(64) DEFAULT NULL COMMENT 'MAC地址',
+    remark VARCHAR(512) DEFAULT NULL COMMENT '备注',
+    tenant_id BIGINT DEFAULT NULL COMMENT '租户ID',
+    created_at DATETIME DEFAULT NULL COMMENT '创建时间',
+    updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_kiosk_code (kiosk_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='岗亭端表';
+
+INSERT INTO kiosk_client (kiosk_code, kiosk_name, barrier_id, lane_id, status, ip_address, remark, created_at, updated_at) VALUES
+('KIOSK001', '入口岗亭A', 1, 1, 'offline', '192.168.1.101', '星河购物中心入口A岗亭', NOW(), NOW()),
+('KIOSK002', '出口岗亭A', 2, 3, 'offline', '192.168.1.102', '星河购物中心出口A岗亭', NOW(), NOW()),
+('KIOSK003', '市民公园岗亭', 3, 5, 'offline', '192.168.1.103', '市民公园停车场岗亭', NOW(), NOW());
+
+-- ============================================
 -- 初始化完成
 -- ============================================

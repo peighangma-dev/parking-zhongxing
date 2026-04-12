@@ -87,6 +87,16 @@
             <el-menu-item index="/report/daily">收费报表</el-menu-item>
           </el-sub-menu>
 
+          <el-sub-menu index="/kiosk">
+            <template #title>
+              <div class="menu-title-wrapper">
+                <el-icon class="menu-icon"><Monitor /></el-icon>
+                <span class="menu-title">岗亭管理</span>
+              </div>
+            </template>
+            <el-menu-item index="/kiosk/list">岗亭列表</el-menu-item>
+          </el-sub-menu>
+
           <el-sub-menu index="/uc">
             <template #title>
               <div class="menu-title-wrapper">
@@ -259,6 +269,7 @@ const pageTitleMap: Record<string, string> = {
   '/report/pass': '通行记录',
   '/report/daily': '收费报表',
   '/report/monthly': '收费月报',
+  '/kiosk/list': '岗亭列表',
   '/uc/user': '用户管理',
   '/uc/role': '角色管理',
   '/uc/menu': '菜单管理',

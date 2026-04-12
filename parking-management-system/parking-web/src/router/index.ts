@@ -107,6 +107,12 @@ const router = createRouter({
           meta: { requiresAuth: true }
         },
         {
+          path: '/kiosk/list',
+          name: 'KioskList',
+          component: () => import('@/views/kiosk/Kiosk.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
           path: '/uc/user',
           name: 'UserManage',
           component: () => import('@/views/uc/UserManage.vue'),
